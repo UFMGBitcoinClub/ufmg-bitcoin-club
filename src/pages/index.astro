@@ -1,0 +1,52 @@
+---
+import Layout from "../components/Layout.astro";
+import HeroProfileCard from "../components/HeroProfileCard.astro";
+import RelayList from "../components/RelayList.astro";
+import NoteCard from "../components/NoteCard.astro";
+import JoinBlock from "../components/JoinBlock.astro";
+import { RELAYS } from "../../scripts/lib/relays.mjs";
+import profile from "../data/profile.json";
+import feed from "../data/feed.json";
+
+const displayName = profile.display_name || profile.name || "Clube Bitcoin UFMG";
+const about =
+  profile.about ||
+  "Academic rigor meets cypherpunk ethos. We are a sovereign collective dedicated to the research, development, and proliferation of Bitcoin and decentralized protocols. Proof-of-work in code and in thought.";
+
+const recentItems = (feed.items ?? []).slice(0, 3);
+---
+
+<Layout title="Home">
+  <HeroProfileCard displayName={displayName} about={about} />
+
+  <section class="activity-section">
+    <div class="activity-intro">
+      <RelayList relays={RELAYS} />
+    </div>
+    <div class="activity-feed">
+      {recentItems.length > 0 ? (
+        recentItems.map((item) => <NoteCard item={item} />)
+      ) : (
+        <p class="empty">No posts fetched yet.</p>
+      )}
+    </div>
+  </section>
+
+  <JoinBlock />
+</Layout>
+
+<style>
+  .activity-section {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 2rem;
+    margin: 2.5rem 0;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--border);
+  }
+  @media (max-width: 768px) {
+    .activity-section {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

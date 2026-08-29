@@ -1,0 +1,22 @@
+{
+  "name": "bitcoin-students-club-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run fetch:all && astro build",
+    "preview": "astro preview",
+    "fetch:all": "npm run fetch:profile && npm run fetch:notes && npm run fetch:calendar && npm run fetch:members && npm run generate:qr",
+    "fetch:profile": "node scripts/fetch-profile.mjs",
+    "fetch:notes": "node scripts/fetch-notes.mjs",
+    "fetch:calendar": "node scripts/fetch-calendar.mjs",
+    "fetch:members": "node scripts/fetch-members.mjs",
+    "generate:qr": "node scripts/generate-qr.mjs"
+  },
+  "dependencies": {
+    "astro": "^4.15.0",
+    "nostr-tools": "^2.7.2",
+    "qrcode": "^1.5.4"
+  }
+}
