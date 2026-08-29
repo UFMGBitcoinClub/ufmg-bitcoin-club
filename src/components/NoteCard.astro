@@ -1,0 +1,104 @@
+---
+export interface FeedItem {
+  type: "note" | "repost";
+  id: string;
+  created_at: number;
+  pubkey?: string;
+  content?: string;
+  original?: {
+    id: string;
+    pubkey: string;
+    created_at: number;
+    content: string;
+  };
+}
+
+export interface Props {
+  item: FeedItem;
+}
+
+const { item } = Astro.props;
+
+const isRepost = item.type === "repost";
+const displayContent = isRepost ? item.original!.content : item.content ?? "";
+const displayId = isRepost ? item.original!.id : item.id;
+const displayCreatedAt = isRepost ? item.original!.created_at : item.created_at;
+
+function shortId(id: string): string {
+  return `${id.slice(0, 8)}...${id.slice(-4)}`;
+}
+
+function timeAgo(unixSeconds: number): string {
+  const diffMs = Date.now() - unixSeconds * 1000;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "JUST NOW";
+  if (mins < 60) return `${mins} MIN${mins === 1 ? "" : "S"} AGO`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} HOUR${hours === 1 ? "" : "S"} AGO`;
+  const days = Math.floor(hours / 24);
+  return `${days} DAY${days === 1 ? "" : "S"} AGO`;
+}
+
+// content may embed hashtags inline (e.g. "#zkp #ufmg") — the mockup shows
+// these as a separate tag line, so we surface any trailing #word tokens.
+const hashtagMatches = displayContent.match(/#\w+/g) ?? [];
+const njumpUrl = `https://njump.me/${displayId}`;
+---
+
+<article class="note-card panel">
+  <div class="note-meta">
+    <span>EVENT ID: {shortId(displayId)}</span>
+    <span>{timeAgo(displayCreatedAt)}</span>
+  </div>
+  {isRepost && <p class="repost-label">↻ reposted</p>}
+  <p class="note-content">{displayContent}</p>
+  <p class="note-footer">
+    {hashtagMatches.length > 0 && <span class="note-tags">{hashtagMatches.join(" ")}</span>}
+    <a class="note-link" href={njumpUrl} target="_blank" rel="noopener noreferrer">
+      [ VIEW ON NOSTR ]
+    </a>
+  </p>
+</article>
+
+<style>
+  .note-card {
+    margin-bottom: 1rem;
+  }
+  .note-card:last-child {
+    margin-bottom: 0;
+  }
+  .note-meta {
+    display: flex;
+    justify-content: space-between;
+    background: var(--bg-alt);
+    margin: -1.5rem -1.5rem 1rem -1.5rem;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .repost-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 0 0 0.5rem 0;
+  }
+  .note-content {
+    margin: 0 0 0.75rem 0;
+    white-space: pre-wrap;
+  }
+  .note-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    font-size: 0.8rem;
+  }
+  .note-tags {
+    color: var(--muted);
+  }
+  .note-link {
+    color: var(--accent);
+    text-decoration: none;
+    margin-left: auto;
+  }
+</style>
