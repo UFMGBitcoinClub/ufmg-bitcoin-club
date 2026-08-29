@@ -1,0 +1,75 @@
+---
+import qr from "../data/lightning-qr.json";
+import { LIGHTNING_ADDRESS, NODE_PUBKEY_DISPLAY } from "../config/contribute.mjs";
+---
+
+<div class="lightning-panel panel">
+  <h2 class="section-title small">Lightning Network</h2>
+  <div class="qr-frame">
+    {qr.svg ? (
+      <Fragment set:html={qr.svg} />
+    ) : (
+      <p class="empty">
+        Set LIGHTNING_ADDRESS in src/config/contribute.mjs and run npm run
+        generate:qr.
+      </p>
+    )}
+  </div>
+  <div class="lightning-address-row">
+    <code>{LIGHTNING_ADDRESS}</code>
+  </div>
+</div>
+
+<div class="value-panel panel">
+  <h2 class="section-title small">Value for Value</h2>
+  <p>
+    Your sats fund our research servers, node infrastructure, and community events.
+    We accept donations strictly via the Lightning Network to ensure low-fee,
+    censorship-resistant transactions.
+  </p>
+  <div class="node-status">
+    <span class="label">STATUS</span>
+    <span class="label">NODE PUBKEY</span>
+  </div>
+  <p class="node-pubkey">{NODE_PUBKEY_DISPLAY}</p>
+</div>
+
+<style>
+  .lightning-panel {
+    background: var(--bg-alt);
+  }
+  .qr-frame {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    max-width: 220px;
+    margin: 1rem 0;
+  }
+  .qr-frame :global(svg) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .lightning-address-row {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.85rem;
+    word-break: break-all;
+  }
+  .value-panel p {
+    margin: 0 0 1.5rem 0;
+  }
+  .node-status {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .node-pubkey {
+    font-size: 0.85rem;
+    margin: 0.5rem 0 0 0;
+  }
+</style>

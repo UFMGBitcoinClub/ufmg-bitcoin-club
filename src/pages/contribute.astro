@@ -1,0 +1,100 @@
+---
+import Layout from "../components/Layout.astro";
+import LightningDonate from "../components/LightningDonate.astro";
+
+const helpItems = [
+  {
+    index: "01",
+    title: "Code",
+    description:
+      "Contribute to our open-source projects on GitHub. We need help with Bitcoin core analysis tools and Nostr client development.",
+    linkLabel: "VIEW REPOS",
+    linkUrl: "#",
+  },
+  {
+    index: "02",
+    title: "Research",
+    description:
+      "Collaborate on technical papers and protocol analysis. Join our weekly seminars on cryptography and decentralized economics.",
+    linkLabel: "READ PAPERS",
+    linkUrl: "#",
+  },
+  {
+    index: "03",
+    title: "Node",
+    description:
+      "Run a Nostr relay or a Bitcoin full node to strengthen the network. Help us build a resilient local infrastructure.",
+    linkLabel: "SETUP GUIDE",
+    linkUrl: "#",
+  },
+];
+---
+
+<Layout title="Contribute" active="contribute">
+  <section class="page-hero">
+    <h1 class="page-title">Contribute to the Network</h1>
+    <p>
+      Clube Bitcoin UFMG operates on a proof-of-work ethos. We rely on the
+      contributions of researchers, developers, and donors to maintain our
+      sovereignty and push the boundaries of decentralized systems.
+    </p>
+  </section>
+
+  <section class="contribute-grid">
+    <LightningDonate />
+  </section>
+
+  <section class="help-section">
+    <h2 class="section-title">Other Ways to Help</h2>
+    <div class="grid-3">
+      {helpItems.map((item) => (
+        <div class="help-card">
+          <span class="help-index">{item.index}</span>
+          <h3>{item.title}</h3>
+          <p>{item.description}</p>
+          <a href={item.linkUrl}>[ {item.linkLabel} ] →</a>
+        </div>
+      ))}
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .contribute-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  .help-section {
+    margin-bottom: 3rem;
+  }
+  .help-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .help-index {
+    font-size: 0.75rem;
+    color: var(--muted);
+    align-self: flex-end;
+  }
+  .help-card h3 {
+    text-transform: uppercase;
+    margin: 0.5rem 0;
+  }
+  .help-card p {
+    flex: 1;
+    margin: 0 0 1rem 0;
+  }
+  .help-card a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+  @media (max-width: 768px) {
+    .contribute-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
