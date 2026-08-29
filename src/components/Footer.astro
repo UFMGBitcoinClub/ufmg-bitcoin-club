@@ -1,0 +1,19 @@
+---
+// TODO: point these at the club's real destinations (repo, relay, contact
+// form) once they exist.
+const footerLinks = [
+  { label: "Whitepapers", href: "#" },
+  { label: "GitHub", href: "#" },
+  { label: "Nostr", href: "#" },
+  { label: "Contact", href: "#" },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <p>© {year} CLUBE BITCOIN UFMG — PROOF OF WORK SINCE GENESIS</p>
+  <nav class="footer-links">
+    {footerLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+  </nav>
+</footer>

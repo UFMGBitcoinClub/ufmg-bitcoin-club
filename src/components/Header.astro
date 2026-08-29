@@ -1,0 +1,26 @@
+---
+import { NAV_ITEMS } from "../lib/nav.js";
+import { withBase } from "../lib/url.js";
+
+export interface Props {
+  active?: string;
+}
+
+const { active } = Astro.props;
+---
+
+<header class="site-header">
+  <a class="logo" href={withBase("/")}>CLUBE BITCOIN UFMG</a>
+  <nav class="nav-list">
+    {
+      NAV_ITEMS.map((item) => (
+        <a
+          class={`nav-link ${active === item.key ? "nav-link--active" : ""}`}
+          href={withBase(item.href)}
+        >
+          [ {item.label} ]
+        </a>
+      ))
+    }
+  </nav>
+</header>
