@@ -1,0 +1,108 @@
+#!/usr/bin/env node
+// Phase 3 (architecture.md §6): fetch NIP-52 calendar events at build time.
+//
+// kind 31922 = date-based event (all-day, `start`/`end` are YYYY-MM-DD).
+// kind 31923 = time-based event (`start`/`end` are unix seconds).
+// Both are parameterized replaceable events — only the newest per `d` tag
+// is current, so we dedupe on that before normalizing.
+//
+// Malformed events (missing title/start) are dropped rather than crashing
+// the build, per the Phase 3 Definition of Done.
+
+import { writeFile, mkdir } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { RELAYS } from "./lib/relays.mjs";
+import { createPool, queryRelays } from "./lib/pool.mjs";
+import { CLUB_PUBKEY } from "../src/config/club.mjs";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const OUTPUT_PATH = path.resolve(__dirname, "../src/data/calendar.json");
+
+function tagValue(tags, name) {
+  const tag = tags.find((t) => t[0] === name);
+  return tag ? tag[1] : null;
+}
+
+function tagValues(tags, name) {
+  return tags.filter((t) => t[0] === name).map((t) => t[1]);
+}
+
+function normalizeEvent(evt) {
+  const d = tagValue(evt.tags, "d");
+  const title = tagValue(evt.tags, "title");
+  const startRaw = tagValue(evt.tags, "start");
+  const endRaw = tagValue(evt.tags, "end");
+  const location = tagValue(evt.tags, "location");
+  const topics = tagValues(evt.tags, "t");
+
+  if (!d || !title || !startRaw) return null;
+
+  const dateOnly = evt.kind === 31922;
+  const startMs = dateOnly ? Date.parse(startRaw) : Number(startRaw) * 1000;
+  const endMs = endRaw ? (dateOnly ? Date.parse(endRaw) : Number(endRaw) * 1000) : null;
+
+  if (Number.isNaN(startMs)) return null;
+
+  return {
+    id: evt.id,
+    title,
+    startMs,
+    endMs,
+    location: location ?? null,
+    description: evt.content ?? "",
+    tags: topics,
+    dateOnly,
+  };
+}
+
+async function main() {
+  if (!CLUB_PUBKEY || CLUB_PUBKEY.startsWith("REPLACE_WITH")) {
+    console.warn("[fetch-calendar] CLUB_PUBKEY is not set — skipping fetch.");
+    return;
+  }
+
+  console.log(`[fetch-calendar] Querying kinds 31922/31923 for ${CLUB_PUBKEY}...`);
+
+  const pool = createPool();
+  const events = await queryRelays(pool, RELAYS, {
+    authors: [CLUB_PUBKEY],
+    kinds: [31922, 31923],
+  });
+  pool.close(RELAYS);
+
+  if (events.length === 0) {
+    console.warn(
+      "[fetch-calendar] No calendar events found. Keeping previously committed calendar.json."
+    );
+    return;
+  }
+
+  const byD = new Map();
+  for (const evt of events) {
+    const d = tagValue(evt.tags, "d");
+    if (!d) continue;
+    const existing = byD.get(d);
+    if (!existing || evt.created_at > existing.created_at) byD.set(d, evt);
+  }
+
+  const normalized = [...byD.values()].map(normalizeEvent).filter(Boolean);
+
+  const now = Date.now();
+  const upcoming = normalized
+    .filter((e) => e.startMs >= now)
+    .sort((a, b) => a.startMs - b.startMs);
+  const past = normalized.filter((e) => e.startMs < now).sort((a, b) => b.startMs - a.startMs);
+
+  const calendar = { upcoming, past, fetchedAt: new Date().toISOString() };
+
+  await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
+  await writeFile(OUTPUT_PATH, JSON.stringify(calendar, null, 2) + "\n", "utf-8");
+  console.log(
+    `[fetch-calendar] Wrote calendar.json (${upcoming.length} upcoming, ${past.length} past)`
+  );
+}
+
+main().catch((err) => {
+  console.error("[fetch-calendar] Unexpected error:", err);
+});

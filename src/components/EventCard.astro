@@ -1,0 +1,120 @@
+---
+export interface Props {
+  event: {
+    id: string;
+    title: string;
+    startMs: number;
+    endMs: number | null;
+    location: string | null;
+    description: string;
+    tags: string[];
+    dateOnly: boolean;
+  };
+  status: "upcoming" | "past";
+}
+
+const { event, status } = Astro.props;
+const isPast = status === "past";
+
+const dateLabel = new Intl.DateTimeFormat("en-CA", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+}).format(new Date(event.startMs));
+
+const timeLabel = event.dateOnly
+  ? null
+  : new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+    }).format(new Date(event.startMs));
+
+// External link only — opens the raw calendar event on a public Nostr
+// viewer, which lets the visitor's own client take over. No signing or
+// wallet-connect happens on this site (architecture.md §2).
+const nostrLink = `https://njump.me/${event.id}`;
+---
+
+<article class={`event-card ${isPast ? "event-card--past" : ""}`}>
+  <div class="event-date-col">
+    <p class="event-marker">
+      {isPast ? "✓" : "■"}
+      {dateLabel.replace(/-/g, ".")}
+    </p>
+    {timeLabel && <p class="event-time">{timeLabel}</p>}
+    {event.location && <p class="event-location">◎ {event.location}</p>}
+    {isPast && <span class="badge badge--archived">ARCHIVED</span>}
+  </div>
+  <div class="event-body">
+    <h3 class="event-title">{event.title}</h3>
+    <p class="event-description">{event.description}</p>
+    {event.tags.length > 0 && (
+      <p class="event-tags">Tags: {event.tags.map((t) => `#${t}`).join(" ")}</p>
+    )}
+  </div>
+  <div class="event-action">
+    <a href={nostrLink} target="_blank" rel="noopener noreferrer">
+      {isPast ? "View Logs →" : "RSVP via Nostr ⚡"}
+    </a>
+  </div>
+</article>
+
+<style>
+  .event-card {
+    display: grid;
+    grid-template-columns: 160px 1fr 160px;
+    gap: 1.5rem;
+    padding: 1.75rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .event-card--past {
+    color: var(--muted);
+  }
+  .event-marker {
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+  }
+  .event-time,
+  .event-location {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0 0 0.25rem 0;
+  }
+  .event-title {
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem 0;
+  }
+  .event-card--past .event-title {
+    color: var(--muted);
+  }
+  .event-description {
+    margin: 0 0 0.5rem 0;
+    max-width: 60ch;
+  }
+  .event-tags {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0;
+  }
+  .event-action {
+    text-align: right;
+    font-size: 0.8rem;
+  }
+  .event-action a {
+    text-decoration: none;
+    color: var(--accent);
+  }
+  .event-card--past .event-action a {
+    color: var(--muted);
+  }
+  @media (max-width: 768px) {
+    .event-card {
+      grid-template-columns: 1fr;
+    }
+    .event-action {
+      text-align: left;
+    }
+  }
+</style>

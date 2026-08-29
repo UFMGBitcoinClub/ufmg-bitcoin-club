@@ -1,0 +1,29 @@
+---
+import Layout from "../components/Layout.astro";
+import EventCard from "../components/EventCard.astro";
+import calendar from "../data/calendar.json";
+
+const hasEvents = calendar.upcoming.length > 0 || calendar.past.length > 0;
+---
+
+<Layout title="Events" active="events">
+  <section class="page-hero">
+    <h1 class="page-title">Upcoming Events</h1>
+  </section>
+
+  {hasEvents ? (
+    <section class="events-list">
+      {calendar.upcoming.map((event) => (
+        <EventCard event={event} status="upcoming" />
+      ))}
+      {calendar.past.map((event) => (
+        <EventCard event={event} status="past" />
+      ))}
+    </section>
+  ) : (
+    <p class="empty">
+      No events published yet — once the manager posts a NIP-52 calendar event, it
+      will appear here after the next rebuild.
+    </p>
+  )}
+</Layout>
