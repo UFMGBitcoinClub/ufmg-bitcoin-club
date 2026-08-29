@@ -1,0 +1,73 @@
+---
+export interface Props {
+  member: {
+    pubkey: string;
+    name: string | null;
+    picture: string | null;
+    about: string | null;
+    nip05: string | null;
+    githubUrl: string | null;
+    linkedinUrl: string | null;
+  };
+}
+
+const { member } = Astro.props;
+const npubLink = `https://njump.me/${member.pubkey}`;
+---
+
+<article class="member-card">
+  {member.picture ? (
+    <img class="member-picture" src={member.picture} alt={member.name ?? "Member avatar"} />
+  ) : (
+    <div class="member-picture member-picture--placeholder" aria-hidden="true" />
+  )}
+  <h3 class="member-name">{member.name ?? "Unnamed"}</h3>
+  {member.about && <p class="member-about">{member.about}</p>}
+  <div class="member-links">
+    <a class="btn btn--outline btn--small" href={npubLink} target="_blank" rel="noopener noreferrer">
+      ⚭ npub
+    </a>
+    {member.githubUrl && (
+      <a class="btn btn--outline btn--small" href={member.githubUrl} target="_blank" rel="noopener noreferrer">
+        &lt;&gt; git
+      </a>
+    )}
+    {member.linkedinUrl && (
+      <a class="btn btn--outline btn--small" href={member.linkedinUrl} target="_blank" rel="noopener noreferrer">
+        in
+      </a>
+    )}
+  </div>
+</article>
+
+<style>
+  .member-card {
+    padding: 1.5rem;
+  }
+  .member-picture {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .member-picture--placeholder {
+    background: var(--bg-alt);
+  }
+  .member-name {
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem 0;
+  }
+  .member-about {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0 0 1rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .member-links {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+</style>

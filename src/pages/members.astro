@@ -1,0 +1,22 @@
+---
+import Layout from "../components/Layout.astro";
+import MemberCard from "../components/MemberCard.astro";
+import data from "../data/members.json";
+---
+
+<Layout title="Members" active="members">
+  <section class="page-hero">
+    <h1 class="page-title">Members</h1>
+  </section>
+
+  {data.members.length > 0 ? (
+    <section class="grid-3">
+      {data.members.map((member) => <MemberCard member={member} />)}
+    </section>
+  ) : (
+    <p class="empty">
+      No members configured yet — add pubkeys in src/config/members.mjs and run
+      npm run fetch:members.
+    </p>
+  )}
+</Layout>
