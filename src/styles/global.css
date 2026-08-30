@@ -251,6 +251,10 @@ hr,
   color: var(--badge-archived-fg);
 }
 
+.badge--default {
+  background: var(--badge-archived-bg);
+  color: var(--badge-archived-fg);
+}
 /* --- Grids --- */
 
 .grid-3 {

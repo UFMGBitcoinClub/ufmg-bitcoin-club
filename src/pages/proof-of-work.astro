@@ -1,7 +1,7 @@
 ---
 import Layout from "../components/Layout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
-import { PROJECTS } from "../config/projects.mjs";
+import data from "../data/projects.json";
 ---
 
 <Layout title="Proof of Work" active="pow">
@@ -14,9 +14,15 @@ import { PROJECTS } from "../config/projects.mjs";
     </p>
   </section>
 
-  <section class="grid-3">
-    {PROJECTS.map((project) => <ProjectCard project={project} />)}
-  </section>
+  {data.projects.length > 0 ? (
+    <section class="grid-3">
+      {data.projects.map((project) => <ProjectCard project={project} />)}
+    </section>
+  ) : (
+    <p class="empty">
+      No projects published yet.
+    </p>
+  )}
 </Layout>
 
 <style>

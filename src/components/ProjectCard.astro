@@ -2,33 +2,54 @@
 export interface Props {
   project: {
     id: string;
-    status: string;
+    d: string;
     title: string;
+    status: string;
+    type: string;
     description: string;
-    contributors: string;
-    linkLabel: string;
-    linkUrl: string;
+    linkUrl: string | null;
+    contributors: string[];
+    tags: string[];
   };
 }
 
 const { project } = Astro.props;
-const badgeClass = `badge badge--${project.status.toLowerCase()}`;
+
+const KNOWN_BADGES: Record<string, string> = {
+  PUBLISHED: "badge--published",
+  ACTIVE: "badge--active",
+  MERGED: "badge--merged",
+};
+const badgeClass = `badge ${KNOWN_BADGES[project.status.toUpperCase()] ?? "badge--default"}`;
+
+const KNOWN_LINK_LABELS: Record<string, string> = {
+  paper: "FETCH PAPER.PDF",
+  repo: "VIEW ON GITHUB",
+  pr: "VIEW PULL REQUEST",
+};
+const linkLabel = KNOWN_LINK_LABELS[project.type.toLowerCase()] ?? "VIEW EXTERNAL LINK";
 ---
 
 <article class="project-card">
   <div class="project-card-head">
-    <span class="project-id">{project.id}</span>
+    <span class="project-id">{project.d}</span>
     <span class={badgeClass}>{project.status}</span>
   </div>
   <h3 class="project-title">{project.title}</h3>
   <p class="project-description">{project.description}</p>
-  <div class="project-contributors">
-    <p class="label">CONTRIBUTORS</p>
-    <p>{project.contributors}</p>
-  </div>
-  <a class="btn btn--outline btn--block" href={project.linkUrl} target="_blank" rel="noopener noreferrer">
-    {project.linkLabel}
-  </a>
+  {project.contributors.length > 0 && (
+    <div class="project-contributors">
+      <p class="label">CONTRIBUTORS</p>
+      <p>{project.contributors.join(", ")}</p>
+    </div>
+  )}
+  {project.linkUrl ? (
+    <a class="btn btn--outline btn--block" href={project.linkUrl} target="_blank" rel="noopener noreferrer">
+      {linkLabel}
+    </a>
+  ) : (
+    <p class="empty">No external link provided.</p>
+  )}
 </article>
 
 <style>
