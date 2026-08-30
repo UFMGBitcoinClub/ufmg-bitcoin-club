@@ -10,5 +10,5 @@
 //   const { data } = nip19.decode("npub1...");
 //   console.log(data); // hex pubkey
 
-export const CLUB_NPUB = "REPLACE_WITH_CLUB_NPUB";
-export const CLUB_PUBKEY = "REPLACE_WITH_CLUB_HEX_PUBKEY";
+export const CLUB_NPUB = "npub1cxxlm9ckvk594jwrtyqrdlmze9uyttu6hvn2yme9sqaml5qk3reqyyu4wn";
+export const CLUB_PUBKEY = "c18dfd971665a85ac9c3590036ff62c97845af9abb26a26f25803bbfd01688f2";
