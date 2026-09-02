@@ -1,0 +1,160 @@
+---
+import Layout from "../components/Layout.astro";
+
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvkogdzl";
+---
+
+<Layout title="Join the Network" description="Apply to join Clube Bitcoin UFMG.">
+  <div class="join-wrap">
+    <section class="join-panel corner-accent">
+      <header class="join-header">
+        <h1 class="join-title">Join the Network</h1>
+        <p class="join-lead">
+          Tell us a bit about yourself. We'll reach out via WhatsApp or email to
+          talk next steps.
+        </p>
+      </header>
+
+      <form class="join-form" action={FORMSPREE_ENDPOINT} method="POST">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="name">Name <span class="required">*</span></label>
+            <input class="technical-input" type="text" id="name" name="name" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="email">Email <span class="required">*</span></label>
+            <input class="technical-input" type="email" id="email" name="email" required />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="whatsapp">WhatsApp number <span class="required">*</span></label>
+            <input class="technical-input" type="tel" id="whatsapp" name="whatsapp" placeholder="+55 31 9XXXX-XXXX" required />
+          </div>
+          <div class="field">
+            <label class="field-label" for="curso">Curso (course/program) <span class="required">*</span></label>
+            <input class="technical-input" type="text" id="curso" name="curso" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="bitcoin_experience">Previous experience with Bitcoin <span class="required">*</span></label>
+          <textarea class="technical-input" id="bitcoin_experience" name="bitcoin_experience" rows="3" required></textarea>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="programming_experience">Programming language experience or interest <span class="required">*</span></label>
+          <input class="technical-input" type="text" id="programming_experience" name="programming_experience" placeholder="e.g. Rust, Python, none yet — curious" required />
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="project_interest">What kind of project do you want to work on? <span class="required">*</span></label>
+          <textarea class="technical-input" id="project_interest" name="project_interest" rows="3" required></textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="npub">Nostr npub <span class="optional">(optional)</span></label>
+            <input class="technical-input" type="text" id="npub" name="npub" placeholder="npub1..." />
+          </div>
+          <div class="field">
+            <label class="field-label" for="availability">Availability <span class="optional">(optional — hours/week or days)</span></label>
+            <input class="technical-input" type="text" id="availability" name="availability" placeholder="e.g. 10 hours/week" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="referral">How did you hear about us? <span class="optional">(optional)</span></label>
+          <input class="technical-input" type="text" id="referral" name="referral" />
+        </div>
+
+        <!-- Honeypot: Formspree silently discards submissions where this is filled -->
+        <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+
+        <div class="submit-row">
+          <button type="submit" class="btn">
+            [ Submit application ]
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .join-wrap {
+    max-width: 48rem;
+    margin: 2.5rem auto 3rem auto;
+  }
+  .join-panel {
+    border: 1px solid var(--border-soft);
+    border-left: 4px solid var(--accent);
+    background: var(--bg-raised);
+    padding: 2.5rem;
+  }
+  .join-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .join-title {
+    font-size: clamp(2rem, 5vw, var(--fs-display));
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0 0 0.75rem 0;
+  }
+  .join-lead {
+    margin: 0;
+    color: var(--muted);
+  }
+  .join-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .field-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .field-label {
+    font-size: var(--fs-label-caps);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--fg);
+    transition: color 0.15s;
+  }
+  .field:focus-within .field-label {
+    color: var(--accent);
+  }
+  .required {
+    color: var(--error);
+  }
+  .optional {
+    color: var(--muted);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .submit-row {
+    border-top: 1px dashed var(--border);
+    padding-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+</style>
