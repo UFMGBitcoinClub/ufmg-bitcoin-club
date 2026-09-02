@@ -1,22 +1,38 @@
 ---
 import Layout from "../components/Layout.astro";
 import MemberCard from "../components/MemberCard.astro";
+import Carousel from "../components/Carousel.astro";
+import JoinBlock from "../components/JoinBlock.astro";
 import data from "../data/members.json";
 ---
 
 <Layout title="Members" active="members">
-  <section class="page-hero">
+  <section class="page-hero panel--accent-left">
     <h1 class="page-title">Members</h1>
+    <p class="page-lead">
+      Registry of current and legacy nodes operating within the Clube Bitcoin
+      UFMG ecosystem — verified via public Nostr identities.
+    </p>
   </section>
 
   {data.members.length > 0 ? (
-    <section class="grid-3">
+    <Carousel ariaLabel="members">
       {data.members.map((member) => <MemberCard member={member} />)}
-    </section>
+    </Carousel>
   ) : (
     <p class="empty">
       No members configured yet — add pubkeys in src/config/members.mjs and run
       npm run fetch:members.
     </p>
   )}
+
+  <JoinBlock />
 </Layout>
+
+<style>
+  .page-lead {
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0;
+  }
+</style>

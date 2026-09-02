@@ -13,28 +13,45 @@ export interface Props {
 
 const { member } = Astro.props;
 const npubLink = `https://njump.me/${member.pubkey}`;
+
+function shortPubkey(pubkey: string): string {
+  return `${pubkey.slice(0, 8)}...${pubkey.slice(-5)}`;
+}
+
+function initials(name: string | null): string {
+  if (!name) return "??";
+  return name.slice(0, 2).toUpperCase();
+}
 ---
 
 <article class="member-card">
-  {member.picture ? (
-    <img class="member-picture" src={member.picture} alt={member.name ?? "Member avatar"} />
-  ) : (
-    <div class="member-picture member-picture--placeholder" aria-hidden="true" />
-  )}
-  <h3 class="member-name">{member.name ?? "Unnamed"}</h3>
+  <div class="member-head">
+    {member.picture ? (
+      <img class="member-avatar" src={member.picture} alt={member.name ?? "Member avatar"} />
+    ) : (
+      <div class="member-avatar member-avatar--placeholder" aria-hidden="true">
+        {initials(member.name)}
+      </div>
+    )}
+    <div>
+      <h3 class="member-name">{member.name ?? "Unnamed"}</h3>
+      {member.nip05 && <div class="member-nip05">&lt; {member.nip05} &gt;</div>}
+    </div>
+  </div>
   {member.about && <p class="member-about">{member.about}</p>}
+  <div class="member-npub">{shortPubkey(member.pubkey)}</div>
   <div class="member-links">
     <a class="btn btn--outline btn--small" href={npubLink} target="_blank" rel="noopener noreferrer">
-      ⚭ npub
+      [ View profile ]
     </a>
     {member.githubUrl && (
       <a class="btn btn--outline btn--small" href={member.githubUrl} target="_blank" rel="noopener noreferrer">
-        &lt;&gt; git
+        &lt;&gt; GitHub
       </a>
     )}
     {member.linkedinUrl && (
       <a class="btn btn--outline btn--small" href={member.linkedinUrl} target="_blank" rel="noopener noreferrer">
-        in
+        in LinkedIn
       </a>
     )}
   </div>
@@ -43,31 +60,69 @@ const npubLink = `https://njump.me/${member.pubkey}`;
 <style>
   .member-card {
     padding: 1.5rem;
+    border-left: 4px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
   }
-  .member-picture {
-    width: 100%;
-    aspect-ratio: 1 / 1;
+  .member-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .member-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
     object-fit: cover;
     border: 1px solid var(--border);
-    margin-bottom: 1rem;
+    flex-shrink: 0;
+    filter: grayscale(1);
   }
-  .member-picture--placeholder {
+  .member-avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: var(--bg-alt);
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 1.1rem;
   }
   .member-name {
-    font-size: 1.1rem;
-    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    margin: 0 0 0.25rem 0;
+  }
+  .member-nip05 {
+    font-size: 0.78rem;
+    color: var(--accent);
   }
   .member-about {
     font-size: 0.85rem;
     color: var(--muted);
-    margin: 0 0 1rem 0;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .member-npub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    background: var(--bg-alt);
+    border: 1px dashed var(--border-soft);
+    padding: 0.5rem 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .member-links {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+  }
+  .member-links a {
+    flex: 1;
+    text-align: center;
   }
 </style>
