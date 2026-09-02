@@ -1,8 +1,6 @@
 name: Build and Deploy
 
-# push + manual dispatch (Phase 1) plus a scheduled cron (from Phase 2
-# onward, per architecture.md §6) so notes/events refresh even without a
-# code change.
+# push + manual dispatch plus a scheduled cron so notes/events refresh even without a code change.
 on:
   push:
     branches: [main]
@@ -29,7 +27,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
 
       - name: Install dependencies
