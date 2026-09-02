@@ -3,23 +3,55 @@ import Layout from "../components/Layout.astro";
 import EventCard from "../components/EventCard.astro";
 import calendar from "../data/calendar.json";
 
-const hasEvents = calendar.upcoming.length > 0 || calendar.past.length > 0;
+const allEvents = [...calendar.upcoming, ...calendar.past];
+const hasEvents = allEvents.length > 0;
+
+const EVENT_CATEGORIES = [
+  { key: "seminars", stem: "seminar" },
+  { key: "workshops", stem: "workshop" },
+  { key: "bitdevs", stem: "bitdev" },
+];
+
+const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
+  key,
+  count: allEvents.filter((ev) =>
+    (ev.tags ?? []).some((t) => t.toLowerCase().startsWith(stem))
+  ).length,
+}));
 ---
 
 <Layout title="Events" active="events">
-  <section class="page-hero">
-    <h1 class="page-title">Upcoming Events</h1>
+  <section class="page-hero panel--accent-left">
+    <p class="page-kicker">:: SYS.DIR.QUERY( EVENTS )</p>
+    <h1 class="page-title">Events &amp; Symposia</h1>
+    <p class="page-lead">
+      Our calendar of seminars, workshops, and meetings 
+    </p>
   </section>
 
   {hasEvents ? (
-    <section class="events-list">
-      {calendar.upcoming.map((event) => (
-        <EventCard event={event} status="upcoming" />
-      ))}
-      {calendar.past.map((event) => (
-        <EventCard event={event} status="past" />
-      ))}
-    </section>
+    <>
+      <div class="filter-bar" role="tablist" aria-label="Filter events by category">
+        <button class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">
+          [[ ALL EVENTS ]] <span class="filter-count">{allEvents.length}</span>
+        </button>
+        {categoryCounts.map(({ key, count }) => (
+          <button class="filter-btn" data-filter={key} role="tab" aria-selected="false">
+            [ {key.toUpperCase()} ] <span class="filter-count">{count}</span>
+          </button>
+        ))}
+      </div>
+
+      <section class="events-list" data-events-grid>
+        {calendar.upcoming.map((event) => (
+          <EventCard event={event} status="upcoming" />
+        ))}
+        {calendar.past.map((event) => (
+          <EventCard event={event} status="past" />
+        ))}
+        <p class="empty" data-events-empty hidden>No events in this category yet.</p>
+      </section>
+    </>
   ) : (
     <p class="empty">
       No events published yet — once the manager posts a NIP-52 calendar event, it
@@ -27,3 +59,111 @@ const hasEvents = calendar.upcoming.length > 0 || calendar.past.length > 0;
     </p>
   )}
 </Layout>
+
+<style>
+  .page-lead {
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .filter-bar {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    overflow-x: auto;
+    margin: 2rem 0 1.5rem 0;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .filter-btn {
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .filter-btn:hover {
+    color: var(--fg);
+  }
+  .filter-btn.is-active {
+    color: var(--accent);
+  }
+  .filter-count {
+    opacity: 0.7;
+    margin-left: 0.3rem;
+  }
+  .events-list {
+    margin-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    scroll-snap-type: y proximity;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--bg-alt);
+  }
+  .events-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  .events-list::-webkit-scrollbar-track {
+    background: var(--bg-alt);
+  }
+  .events-list::-webkit-scrollbar-thumb {
+    background: var(--accent);
+  }
+  .events-list :global(.event-card) {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+  .events-list :global(.event-card[hidden]) {
+    display: none;
+  }
+</style>
+
+<script>
+  const CATEGORY_STEMS: Record<string, string> = {
+    seminars: "seminar",
+    workshops: "workshop",
+    bitdevs: "bitdev",
+  };
+
+  const filterButtons = document.querySelectorAll<HTMLButtonElement>(
+    ".filter-bar .filter-btn"
+  );
+  const cards = document.querySelectorAll<HTMLElement>(
+    "[data-events-grid] .event-card"
+  );
+  const emptyMessage = document.querySelector<HTMLElement>("[data-events-empty]");
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const filter = button.dataset.filter ?? "all";
+      const stem = CATEGORY_STEMS[filter];
+
+      filterButtons.forEach((b) => {
+        b.classList.toggle("is-active", b === button);
+        b.setAttribute("aria-selected", String(b === button));
+      });
+
+      let visible = 0;
+      cards.forEach((card) => {
+        const tags = (card.dataset.tags ?? "").split(" ").filter(Boolean);
+        const matches =
+          filter === "all" ||
+          (stem !== undefined && tags.some((t) => t.startsWith(stem)));
+        card.hidden = !matches;
+        if (matches) visible += 1;
+      });
+
+      if (emptyMessage) emptyMessage.hidden = visible > 0;
+    });
+  });
+</script>
