@@ -15,17 +15,25 @@ export interface FeedItem {
 
 export interface Props {
   item: FeedItem;
+  avatarUrl?: string | null;
 }
 
-const { item } = Astro.props;
+const { item, avatarUrl } = Astro.props;
 
 const isRepost = item.type === "repost";
-const displayContent = isRepost ? item.original!.content : item.content ?? "";
+const displayContent = (
+  isRepost ? item.original!.content : item.content ?? ""
+).trim();
 const displayId = isRepost ? item.original!.id : item.id;
 const displayCreatedAt = isRepost ? item.original!.created_at : item.created_at;
+const displayPubkey = isRepost ? item.original!.pubkey : item.pubkey ?? "";
 
 function shortId(id: string): string {
   return `${id.slice(0, 8)}...${id.slice(-4)}`;
+}
+
+function initials(pubkey: string): string {
+  return pubkey ? pubkey.slice(0, 2).toUpperCase() : "??";
 }
 
 function timeAgo(unixSeconds: number): string {
@@ -45,37 +53,110 @@ const hashtagMatches = displayContent.match(/#\w+/g) ?? [];
 const njumpUrl = `https://njump.me/${displayId}`;
 ---
 
-<article class="note-card panel">
+<article class="note-card">
+  <div class="note-dot" aria-hidden="true"></div>
   <div class="note-meta">
-    <span>EVENT ID: {shortId(displayId)}</span>
-    <span>{timeAgo(displayCreatedAt)}</span>
+    <div class="note-author">
+      {avatarUrl && !isRepost ? (
+        <img
+          class="note-avatar note-avatar--img"
+          src={avatarUrl}
+          alt=""
+          loading="lazy"
+          width="26"
+          height="26"
+        />
+      ) : (
+        <span class="note-avatar">{initials(displayPubkey)}</span>
+      )}
+      <span class="note-pubkey">{shortId(displayPubkey || displayId)}</span>
+    </div>
+    <div class="note-meta-right">
+      <span>{timeAgo(displayCreatedAt)}</span>
+      <a class="view-external" href={njumpUrl} target="_blank" rel="noopener noreferrer">
+        <span class="view-external-text">[ VIEW ]</span>
+        <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+      </a>
+    </div>
   </div>
   {isRepost && <p class="repost-label">↻ reposted</p>}
   <p class="note-content">{displayContent}</p>
-  <p class="note-footer">
-    {hashtagMatches.length > 0 && <span class="note-tags">{hashtagMatches.join(" ")}</span>}
-    <a class="note-link" href={njumpUrl} target="_blank" rel="noopener noreferrer">
-      [ VIEW ON NOSTR ]
-    </a>
-  </p>
+  <div class="note-footer">
+    <span>id: {shortId(displayId)}</span>
+    {hashtagMatches.length > 0 && <span>{hashtagMatches.join(" ")}</span>}
+    <span>&lt; kind: 1 &gt;</span>
+  </div>
 </article>
 
 <style>
   .note-card {
-    margin-bottom: 1rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 12.5rem;
+    padding: 1.25rem 0 1.25rem 1rem;
+    border-left: 4px solid var(--accent);
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    background: var(--accent-soft-bg);
   }
-  .note-card:last-child {
-    margin-bottom: 0;
+  .note-card:hover {
+    background: #fdeacb;
+  }
+  .note-dot {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    background: var(--fg);
+    transition: background-color 0.15s;
+  }
+  .note-card:hover .note-dot {
+    background: var(--accent);
+  }
+  .note-card:nth-of-type(even) .note-avatar {
+    background: var(--primary);
+    color: #fff;
   }
   .note-meta {
     display: flex;
     justify-content: space-between;
-    background: var(--bg-alt);
-    margin: -1.5rem -1.5rem 1rem -1.5rem;
-    padding: 0.5rem 1.5rem;
-    font-size: 0.75rem;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.6rem;
+  }
+  .note-author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .note-avatar {
+    width: 1.6rem;
+    height: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fg);
+    color: var(--bg);
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .note-avatar--img {
+    object-fit: cover;
+  }
+  .note-pubkey {
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+  .note-meta-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.72rem;
     color: var(--muted);
-    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
   }
   .repost-label {
     font-size: 0.75rem;
@@ -83,22 +164,29 @@ const njumpUrl = `https://njump.me/${displayId}`;
     margin: 0 0 0.5rem 0;
   }
   .note-content {
+    flex: 1;
+    min-height: 0;
     margin: 0 0 0.75rem 0;
+    font-size: var(--fs-body-md);
     white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: var(--muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    border-bottom: double;
+    border-bottom-color: #dbc2af;
   }
   .note-footer {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 1rem;
+    flex-wrap: nowrap;
     margin: 0;
-    font-size: 0.8rem;
-  }
-  .note-tags {
-    color: var(--muted);
-  }
-  .note-link {
-    color: var(--accent);
-    text-decoration: none;
-    margin-left: auto;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    color: var(--muted-2);
+    white-space: nowrap;
+    overflow: hidden;
   }
 </style>
