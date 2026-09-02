@@ -1,22 +1,45 @@
 ---
 import Layout from "../components/Layout.astro";
 import ProjectCard from "../components/ProjectCard.astro";
+import Carousel from "../components/Carousel.astro";
 import data from "../data/projects.json";
+
+const PROJECT_TYPES = ["repo", "pr", "paper"];
+
+const typeCounts = PROJECT_TYPES.map((key) => ({
+  key,
+  count: data.projects.filter((p) => p.type.toLowerCase() === key).length,
+}));
 ---
 
 <Layout title="Proof of Work" active="pow">
-  <section class="page-hero panel--muted">
-    <h1 class="page-title">Proof of Work.</h1>
-    <p>
-      An open ledger of active research modules, protocol analyses, and engineering
-      projects developed by the collective. Strict adherence to verifiable computation
-      and peer review.
+  <section class="page-hero panel--accent-left">
+    <p class="page-kicker">:: SYS.DIR.QUERY( "PROOF_OF_WORK" )</p>
+    <h1 class="page-title">Proof of Work</h1>
+    <p class="page-lead">
+      An immutable directory of ongoing research, engineering deployments, and
+      theoretical formulations conducted by network participants.
     </p>
   </section>
 
   {data.projects.length > 0 ? (
-    <section class="grid-3">
-      {data.projects.map((project) => <ProjectCard project={project} />)}
+    <section class="projects-section">
+      <div class="filter-bar" role="tablist" aria-label="Filter projects by type">
+        <button class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">
+          [[ ALL PROJECTS ]] <span class="filter-count">{data.projects.length}</span>
+        </button>
+        {typeCounts.map(({ key, count }) => (
+          <button class="filter-btn" data-filter={key} role="tab" aria-selected="false">
+            [ {key.toUpperCase()} ] <span class="filter-count">{count}</span>
+          </button>
+        ))}
+      </div>
+
+      <Carousel ariaLabel="projects">
+        {data.projects.map((project) => <ProjectCard project={project} />)}
+      </Carousel>
+
+      <p class="empty" data-projects-empty hidden>No projects match this filter.</p>
     </section>
   ) : (
     <p class="empty">
@@ -26,7 +49,75 @@ import data from "../data/projects.json";
 </Layout>
 
 <style>
-  .grid-3 {
+  .projects-section {
     margin-bottom: 3rem;
   }
+  .page-lead {
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .filter-bar {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    overflow-x: auto;
+    margin: 2rem 0 1.5rem 0;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .filter-btn {
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .filter-btn:hover {
+    color: var(--fg);
+  }
+  .filter-btn.is-active {
+    color: var(--accent);
+  }
+  .filter-count {
+    opacity: 0.7;
+    margin-left: 0.3rem;
+  }
+  .projects-section :global(.project-card[hidden]) {
+    display: none;
+  }
 </style>
+
+<script>
+  const filterButtons = document.querySelectorAll<HTMLButtonElement>(
+    ".filter-bar .filter-btn"
+  );
+  const cards = document.querySelectorAll<HTMLElement>("[data-project-type]");
+  const emptyMessage = document.querySelector<HTMLElement>("[data-projects-empty]");
+
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const filter = button.dataset.filter ?? "all";
+
+      filterButtons.forEach((b) => {
+        b.classList.toggle("is-active", b === button);
+        b.setAttribute("aria-selected", String(b === button));
+      });
+
+      let visible = 0;
+      cards.forEach((card) => {
+        const matches = filter === "all" || card.dataset.projectType === filter;
+        card.hidden = !matches;
+        if (matches) visible += 1;
+      });
+
+      if (emptyMessage) emptyMessage.hidden = visible > 0;
+    });
+  });
+</script>
