@@ -3,73 +3,170 @@ import qr from "../data/lightning-qr.json";
 import { LIGHTNING_ADDRESS, NODE_PUBKEY_DISPLAY } from "../config/contribute.mjs";
 ---
 
-<div class="lightning-panel panel">
-  <h2 class="section-title small">Lightning Network</h2>
-  <div class="qr-frame">
-    {qr.svg ? (
-      <Fragment set:html={qr.svg} />
-    ) : (
-      <p class="empty">
-        Set LIGHTNING_ADDRESS in src/config/contribute.mjs and run npm run
-        generate:qr.
-      </p>
-    )}
+<div class="lightning-panel">
+  <div class="qr-side">
+    <p class="mono-label">// Execute: lightning_invoice</p>
+    <div class="qr-frame">
+      {qr.svg ? (
+        <Fragment set:html={qr.svg} />
+      ) : (
+        <p class="empty">
+          Set LIGHTNING_ADDRESS in src/config/contribute.mjs and run npm run
+          generate:qr.
+        </p>
+      )}
+      <span class="qr-corner qr-corner--tl" aria-hidden="true"></span>
+      <span class="qr-corner qr-corner--tr" aria-hidden="true"></span>
+      <span class="qr-corner qr-corner--bl" aria-hidden="true"></span>
+      <span class="qr-corner qr-corner--br" aria-hidden="true"></span>
+    </div>
   </div>
-  <div class="lightning-address-row">
-    <code>{LIGHTNING_ADDRESS}</code>
+  <div class="info-side">
+    <h2 class="section-title small">Support directly</h2>
+    <p>
+      Send satoshis seamlessly via the Lightning Network. Value transfer
+      verified instantly.
+    </p>
+    <div class="address-block">
+      <label class="mono-label">LUD-16 address</label>
+      <div class="lightning-address-row">
+        <code>{LIGHTNING_ADDRESS}</code>
+      </div>
+      <button class="btn copy-btn" type="button" data-copy-address={LIGHTNING_ADDRESS}>
+        <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+        <span data-copy-label>[ Copy address ]</span>
+      </button>
+    </div>
+    <div class="node-status">
+      <span class="mono-label">Status</span>
+      <span class="mono-label">Node pubkey</span>
+    </div>
+    <p class="node-pubkey">{NODE_PUBKEY_DISPLAY}</p>
   </div>
-</div>
-
-<div class="value-panel panel">
-  <h2 class="section-title small">Value for Value</h2>
-  <p>
-    Your sats fund our research servers, node infrastructure, and community events.
-    We accept donations strictly via the Lightning Network to ensure low-fee,
-    censorship-resistant transactions.
-  </p>
-  <div class="node-status">
-    <span class="label">STATUS</span>
-    <span class="label">NODE PUBKEY</span>
-  </div>
-  <p class="node-pubkey">{NODE_PUBKEY_DISPLAY}</p>
 </div>
 
 <style>
   .lightning-panel {
-    background: var(--bg-alt);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-raised);
+  }
+  .qr-side {
+    padding: 2rem;
+    border-right: 1px solid var(--border-soft);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
   }
   .qr-frame {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 1.5rem;
+    position: relative;
+    background: #fff;
+    border: 2px solid var(--border);
+    padding: 1.25rem;
     max-width: 220px;
-    margin: 1rem 0;
+    box-shadow: 2px 2px 0 0 var(--border);
+  }
+  .qr-corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+  }
+  .qr-corner--tl {
+    top: -7px;
+    left: -7px;
+    border-top: 2px solid var(--accent);
+    border-left: 2px solid var(--accent);
+  }
+  .qr-corner--tr {
+    top: -7px;
+    right: -7px;
+    border-top: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+  }
+  .qr-corner--bl {
+    bottom: -7px;
+    left: -7px;
+    border-bottom: 2px solid var(--accent);
+    border-left: 2px solid var(--accent);
+  }
+  .qr-corner--br {
+    bottom: -7px;
+    right: -7px;
+    border-bottom: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
   }
   .qr-frame :global(svg) {
     width: 100%;
     height: auto;
     display: block;
   }
+  .info-side {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    justify-content: center;
+  }
+  .info-side p {
+    margin: 0;
+    color: var(--muted);
+  }
+  .address-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
   .lightning-address-row {
     border: 1px solid var(--border);
-    background: var(--bg);
+    background: var(--bg-alt);
     padding: 0.6rem 0.9rem;
     font-size: 0.85rem;
     word-break: break-all;
   }
-  .value-panel p {
-    margin: 0 0 1.5rem 0;
+  .copy-btn {
+    width: 100%;
   }
   .node-status {
     display: flex;
     justify-content: space-between;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border-soft);
     padding-top: 0.75rem;
-    font-size: 0.7rem;
-    color: var(--muted);
   }
   .node-pubkey {
     font-size: 0.85rem;
-    margin: 0.5rem 0 0 0;
+    margin: -0.75rem 0 0 0;
+  }
+  @media (max-width: 768px) {
+    .lightning-panel {
+      grid-template-columns: 1fr;
+    }
+    .qr-side {
+      border-right: none;
+      border-bottom: 1px solid var(--border-soft);
+    }
   }
 </style>
+
+<script>
+  const copyButton = document.querySelector<HTMLButtonElement>("[data-copy-address]");
+  const label = copyButton?.querySelector<HTMLElement>("[data-copy-label]");
+
+  copyButton?.addEventListener("click", async () => {
+    const address = copyButton.dataset.copyAddress ?? "";
+    try {
+      await navigator.clipboard.writeText(address);
+      if (label) {
+        const original = label.textContent ?? "";
+        label.textContent = "[ COPIED! ]";
+        window.setTimeout(() => {
+          label.textContent = original;
+        }, 1500);
+      }
+    } catch {
+      window.prompt("Copy the Lightning address:", address);
+    }
+  });
+</script>

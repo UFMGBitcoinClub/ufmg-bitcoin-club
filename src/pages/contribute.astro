@@ -4,27 +4,27 @@ import LightningDonate from "../components/LightningDonate.astro";
 
 const helpItems = [
   {
-    index: "01",
+    icon: "code",
     title: "Code",
     description:
-      "Contribute to our open-source projects on GitHub. We need help with Bitcoin core analysis tools and Nostr client development.",
-    linkLabel: "VIEW REPOS",
+      "Contribute PRs to our open-source tools, Nostr client interfaces, and data visualization repos.",
+    linkLabel: "View GitHub",
     linkUrl: "#",
   },
   {
-    index: "02",
+    icon: "menu_book",
     title: "Research",
     description:
-      "Collaborate on technical papers and protocol analysis. Join our weekly seminars on cryptography and decentralized economics.",
-    linkLabel: "READ PAPERS",
+      "Submit whitepapers, protocol analysis, or cryptographic reviews to our peer-reviewed archive.",
+    linkLabel: "Read papers",
     linkUrl: "#",
   },
   {
-    index: "03",
-    title: "Node",
+    icon: "lan",
+    title: "Infrastructure",
     description:
-      "Run a Nostr relay or a Bitcoin full node to strengthen the network. Help us build a resilient local infrastructure.",
-    linkLabel: "SETUP GUIDE",
+      "Run a Nostr relay or a Bitcoin full node, provide liquidity, or assist in maintaining our physical node architecture.",
+    linkLabel: "Setup guide",
     linkUrl: "#",
   },
 ];
@@ -33,10 +33,11 @@ const helpItems = [
 <Layout title="Contribute" active="contribute">
   <section class="page-hero">
     <h1 class="page-title">Contribute to the Network</h1>
-    <p>
-      Clube Bitcoin UFMG operates on a proof-of-work ethos. We rely on the
-      contributions of researchers, developers, and donors to maintain our
-      sovereignty and push the boundaries of decentralized systems.
+    <p class="page-lead">
+      &gt; Initializing contribution protocol...<br />
+      &gt; Sovereign research requires uncompromised funding and
+      collaborative rigor. Support the pursuit of hard money and
+      open-source infrastructure.
     </p>
   </section>
 
@@ -45,14 +46,14 @@ const helpItems = [
   </section>
 
   <section class="help-section">
-    <h2 class="section-title">Other Ways to Help</h2>
+    <h2 class="section-title small">Other vectors of contribution</h2>
     <div class="grid-3">
       {helpItems.map((item) => (
         <div class="help-card">
-          <span class="help-index">{item.index}</span>
+          <span class="material-symbols-outlined help-icon" aria-hidden="true">{item.icon}</span>
           <h3>{item.title}</h3>
           <p>{item.description}</p>
-          <a href={item.linkUrl}>[ {item.linkLabel} ] →</a>
+          <a href={item.linkUrl}>&gt; {item.linkLabel}</a>
         </div>
       ))}
     </div>
@@ -60,41 +61,73 @@ const helpItems = [
 </Layout>
 
 <style>
+  .page-hero {
+    text-align: center;
+  }
+  .page-lead {
+    color: var(--muted);
+    max-width: 62ch;
+    border-left: 2px solid var(--accent);
+    padding: 1rem 1.25rem;
+    background: var(--bg-alt);
+    text-align: left;
+    margin: 0 auto;
+  }
   .contribute-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
     margin-bottom: 3rem;
   }
   .help-section {
     margin-bottom: 3rem;
   }
   .help-card {
+    position: relative;
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
+    border: 1px solid var(--muted-2);
+    background: var(--bg-raised);
   }
-  .help-index {
-    font-size: 0.75rem;
-    color: var(--muted);
-    align-self: flex-end;
+  .help-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--fg);
+    transition: background-color 0.15s;
+  }
+  .help-card:hover {
+    background: var(--bg-alt);
+  }
+  .help-card:hover::before {
+    background: var(--accent);
+  }
+  .help-icon {
+    font-size: 30px;
+    color: var(--fg);
+    margin-bottom: 0.75rem;
+    transition: color 0.15s;
+  }
+  .help-card:hover .help-icon {
+    color: var(--accent);
   }
   .help-card h3 {
     text-transform: uppercase;
-    margin: 0.5rem 0;
+    margin: 0 0 0.75rem 0;
   }
   .help-card p {
     flex: 1;
     margin: 0 0 1rem 0;
+    color: var(--muted);
   }
   .help-card a {
-    color: var(--accent);
+    color: var(--fg);
     text-decoration: none;
     font-size: 0.85rem;
+    text-transform: uppercase;
   }
-  @media (max-width: 768px) {
-    .contribute-grid {
-      grid-template-columns: 1fr;
-    }
+  .help-card a:hover {
+    color: var(--accent);
   }
 </style>

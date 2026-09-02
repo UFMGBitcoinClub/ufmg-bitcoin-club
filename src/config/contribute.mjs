@@ -2,7 +2,7 @@
 // content — no Nostr fetch, no backend. Get a Lightning Address from a
 // custodial provider (Alby, Wallet of Satoshi, etc.) or your own LNbits
 // instance, and paste it below.
-export const LIGHTNING_ADDRESS = "REPLACE_WITH_LIGHTNING_ADDRESS";
+export const LIGHTNING_ADDRESS = "competentluminescence615123@getalby.com";
 
 // Optional: your node's pubkey, or any short status label you want shown
 // next to "NODE PUBKEY" in the Value for Value panel.
