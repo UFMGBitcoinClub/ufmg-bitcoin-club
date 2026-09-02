@@ -12,8 +12,10 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="site-footer">
-  <p>© {year} CLUBE BITCOIN UFMG — PROOF OF WORK SINCE GENESIS</p>
-  <nav class="footer-links">
-    {footerLinks.map((link) => <a href={link.href}>{link.label}</a>)}
-  </nav>
+  <div class="site-footer-inner">
+    <p>© {year} Clube Bitcoin UFMG — Proof of work since Genesis</p>
+    <nav class="footer-links">
+      {footerLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+    </nav>
+  </div>
 </footer>
