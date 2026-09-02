@@ -1,58 +1,61 @@
 ---
+import { withBase } from "../lib/url.js";
+
 export interface Props {
   displayName: string;
   about: string;
-  manifestoUrl?: string;
-  joinUrl?: string;
+  pubkey: string;
+  projectsCount: number;
+  eventsCount: number;
+  logoUrl?: string | null;
 }
 
-const { displayName, about, manifestoUrl = "#manifesto", joinUrl = "#join" } = Astro.props;
+const { displayName, about, pubkey, projectsCount, eventsCount, logoUrl } =
+  Astro.props;
+
+function shortPubkey(pk: string): string {
+  return `${pk.slice(0, 7)}...${pk.slice(-9)}`;
+}
 ---
 
-<section class="hero panel">
+<section class="hero panel--accent-left">
   <div class="hero-text">
     <h1 class="hero-title">{displayName}</h1>
     <p class="hero-about">{about}</p>
     <div class="hero-actions">
-      <a class="btn btn--outline" href={manifestoUrl}>MANIFESTO</a>
-      <a class="btn btn--primary" href={joinUrl}>JOIN</a>
+      <a class="btn btn--dark" href={withBase("/manifesto")}>
+        Read manifesto
+        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+      </a>
     </div>
   </div>
-  <div class="hero-art" aria-hidden="true">
-    <svg viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
-      <g stroke="var(--fg)" stroke-width="0.5" opacity="0.35">
-        <line x1="10" y1="20" x2="90" y2="60" />
-        <line x1="90" y1="60" x2="160" y2="30" />
-        <line x1="160" y1="30" x2="240" y2="55" />
-        <line x1="240" y1="55" x2="300" y2="15" />
-        <line x1="20" y1="120" x2="90" y2="60" />
-        <line x1="20" y1="120" x2="80" y2="170" />
-        <line x1="80" y1="170" x2="150" y2="150" />
-        <line x1="150" y1="150" x2="160" y2="30" />
-        <line x1="150" y1="150" x2="220" y2="190" />
-        <line x1="220" y1="190" x2="240" y2="55" />
-        <line x1="240" y1="55" x2="290" y2="140" />
-        <line x1="290" y1="140" x2="220" y2="190" />
-        <line x1="90" y1="60" x2="150" y2="150" />
-      </g>
-      <g fill="var(--fg)">
-        <circle cx="10" cy="20" r="2.5" />
-        <circle cx="90" cy="60" r="2.5" />
-        <circle cx="160" cy="30" r="2.5" />
-        <circle cx="240" cy="55" r="2.5" />
-        <circle cx="300" cy="15" r="2.5" />
-        <circle cx="20" cy="120" r="2.5" />
-        <circle cx="80" cy="170" r="2.5" />
-        <circle cx="150" cy="150" r="2.5" />
-        <circle cx="220" cy="190" r="2.5" />
-        <circle cx="290" cy="140" r="2.5" />
-      </g>
-      <circle cx="160" cy="105" r="34" fill="none" stroke="var(--fg)" stroke-width="1" />
-      <text x="160" y="101" text-anchor="middle" font-size="13" font-weight="700" fill="var(--fg)">₿ UFMG</text>
-      <text x="160" y="115" text-anchor="middle" font-size="6" letter-spacing="1" fill="var(--muted)">
-        DECENTRALIZED NETWORK
-      </text>
-    </svg>
+  <div class="hero-art corner-accent">
+    <img
+      class="hero-logo"
+      src={withBase("/svg/clube-bitcoin-logo.svg")}
+      alt={`${displayName} logo`}
+      width="220"
+      height="220"
+    />
+  </div>
+</section>
+
+<section class="stat-bar">
+  <div class="stat">
+    <span class="mono-label">PubKey</span>
+    <span class="stat-value stat-value--pubkey">{shortPubkey(pubkey)}</span>
+  </div>
+  <div class="stat">
+    <span class="mono-label">Projects</span>
+    <span class="stat-value stat-value--counter">{projectsCount}</span>
+  </div>
+  <div class="stat">
+    <span class="mono-label">Events</span>
+    <span class="stat-value stat-value--counter">{eventsCount}</span>
+  </div>
+  <div class="stat">
+    <span class="mono-label">Established at</span>
+    <span class="stat-value stat-value--muted">900,792</span>
   </div>
 </section>
 
@@ -65,15 +68,17 @@ const { displayName, about, manifestoUrl = "#manifesto", joinUrl = "#join" } = A
     margin-top: 2rem;
   }
   .hero-title {
-    font-size: 2.4rem;
-    font-weight: 700;
+    font-size: clamp(2.25rem, 6vw, var(--fs-display));
+    font-weight: 800;
     text-transform: uppercase;
+    letter-spacing: -0.03em;
     margin: 0 0 1rem 0;
     line-height: 1.1;
   }
   .hero-about {
     margin: 0 0 1.5rem 0;
     max-width: 46ch;
+    color: var(--muted);
   }
   .hero-actions {
     display: flex;
@@ -81,16 +86,69 @@ const { displayName, about, manifestoUrl = "#manifesto", joinUrl = "#join" } = A
   }
   .hero-art {
     display: flex;
+    align-items: center;
     justify-content: center;
+    padding: 1.5rem;
   }
-  .hero-art svg {
+  .hero-logo {
     width: 100%;
-    max-width: 340px;
+    max-width: 290px;
     height: auto;
   }
+
+  .stat-bar {
+    text-align: center;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    padding: 0.5rem 0.5rem;
+    margin: 1rem 0 
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0 1.25rem;
+    border-right: 1px solid var(--border-soft);
+  }
+  .stat:first-child {
+    padding-left: 0;
+  }
+  .stat:last-child {
+    border-right: none;
+  }
+  .stat-value {
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+  .stat-value--pubkey {
+    word-break: break-all;
+    color: var(--accent);
+  }
+  .stat-value--counter {
+    font-size: var(--fs-headline-md);
+    line-height: 1.1;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .stat-value--muted {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
   @media (max-width: 768px) {
     .hero {
       grid-template-columns: 1fr;
+    }
+    .stat-bar {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.85rem 0;
+    }
+    .stat {
+      border-right: none;
+      padding: 0;
     }
   }
 </style>
