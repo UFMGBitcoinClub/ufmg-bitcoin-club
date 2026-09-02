@@ -1,0 +1,435 @@
+---
+export interface RelayProbe {
+  url: string;
+  host: string;
+  ok: boolean;
+  latencyMs: number | null;
+  error: string | null;
+  nip11: {
+    name: string | null;
+    description: string | null;
+    software: string | null;
+    version: string | null;
+    pubkey: string | null;
+    contact: string | null;
+    supportedNips: number[];
+    limits: Record<string, unknown>;
+  } | null;
+  eventCounts: Record<string, number>;
+  totalEvents: number;
+  probedAt: string;
+}
+
+export interface Props {
+  probes: RelayProbe[];
+  feedItems: {
+    type: "note" | "repost";
+    content?: string;
+    original?: { content: string };
+  }[];
+  calendar: {
+    upcoming: { title: string; startMs: number }[];
+    past: unknown[];
+  };
+  sync: { relays: string | null; feed: string | null; calendar: string | null };
+  whoami: { npub: string | null; lud16: string | null };
+}
+
+const { probes, feedItems, calendar, sync, whoami } = Astro.props;
+
+const KIND_LABELS: Record<string, string> = {
+  "0": "profile",
+  "1": "note",
+  "6": "repost",
+  "31922": "time-event",
+  "31923": "range-event",
+  "32268": "project",
+};
+
+function holdsLabel(counts: Record<string, number>): string {
+  const parts = Object.entries(counts)
+    .sort((a, b) => Number(a[0]) - Number(b[0]))
+    .map(([kind, count]) => `${count} ${KIND_LABELS[kind] ?? `kind:${kind}`}`);
+  return parts.length > 0 ? parts.join(" · ") : "no club events found";
+}
+
+function shortSoftware(software: string | null): string | null {
+  if (!software) return null;
+  return software.replace(/^git\+|\.git$/g, "").split("/").pop() ?? null;
+}
+
+function nipsLabel(nips: number[]): string | null {
+  if (nips.length === 0) return null;
+  const head = nips.slice(0, 12).join(", ");
+  return nips.length > 12 ? `${head} +${nips.length - 12} more` : head;
+}
+
+function limitsLabel(limits: Record<string, unknown>): string | null {
+  const entries = Object.entries(limits);
+  if (entries.length === 0) return null;
+  return entries.map(([k, v]) => `${k}=${String(v)}`).join(" · ");
+}
+
+const probeDate = sync.relays ? sync.relays.slice(0, 16).replace("T", " ") : "unknown";
+
+const relayEntries = probes.map((p) => ({
+  host: p.host,
+  url: p.url,
+  ok: p.ok,
+  latencyMs: p.latencyMs,
+  error: p.error,
+  holds: holdsLabel(p.eventCounts),
+  nip11: p.nip11
+    ? {
+        name: p.nip11.name,
+        software: shortSoftware(p.nip11.software),
+        version: p.nip11.version,
+        contact: p.nip11.contact,
+        nips: nipsLabel(p.nip11.supportedNips),
+        limits: limitsLabel(p.nip11.limits),
+      }
+    : null,
+}));
+
+const nextEvent = calendar.upcoming[0] ?? null;
+
+const terminalData = {
+  relays: relayEntries,
+  feed: feedItems.map((item) => ({
+    content: (item.type === "repost" ? item.original?.content : item.content) ?? "",
+  })),
+  events: {
+    upcomingCount: calendar.upcoming.length,
+    pastCount: calendar.past.length,
+    next: nextEvent ? { title: nextEvent.title, startMs: nextEvent.startMs } : null,
+  },
+  sync,
+  whoami,
+};
+const terminalDataJson = JSON.stringify(terminalData).replace(/</g, "\\u003c");
+---
+
+<div class="terminal terminal-panel corner-accent" data-terminal>
+  <div class="term-scrollback" data-output>
+    <p class="term-line">
+      <span class="ok">UFMG BITCOIN CLUB</span>
+      <span class="accent"> — NETWORK TERMINAL</span>
+    </p>
+    <p class="term-line"><span class="dim">static build · data synced at {probeDate}</span></p>
+    <p class="term-line"><span class="dim">type 'help' for commands</span></p>
+  </div>
+
+  <p class="relay-prompt" data-prompt-static>
+    root@ufmg:~$ <span class="cursor">_</span>
+  </p>
+  <form class="prompt-form" data-prompt-form hidden>
+    <label class="prompt-label" for="terminal-prompt">root@ufmg:~$</label>
+    <input
+      id="terminal-prompt"
+      class="prompt-input"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="Terminal command"
+    />
+    <span class="cursor accent">_</span>
+  </form>
+
+  <script type="application/json" data-terminal-data set:html={terminalDataJson} />
+</div>
+
+<style>
+  .terminal {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .terminal::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(252, 249, 242, 0.025) 0 1px,
+      transparent 1px 3px
+    );
+  }
+  .term-scrollback {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(247, 147, 26, 0.6) transparent;
+  }
+  .term-scrollback::-webkit-scrollbar {
+    width: 6px;
+  }
+  .term-scrollback::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .term-scrollback::-webkit-scrollbar-thumb {
+    background: rgba(247, 147, 26, 0.6);
+  }
+  /* JS-created nodes (print()) carry no Astro scope attribute, so every
+     rule they must match is :global underneath the scoped .terminal root. */
+  .terminal :global(.term-line) {
+    margin: 0 0 0.35rem 0;
+    font-size: 0.78rem;
+    color: rgba(252, 249, 242, 0.85);
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
+  .terminal :global(.term-line--echo) {
+    margin-top: 0.5rem;
+  }
+  .terminal :global(.dim) {
+    color: rgba(252, 249, 242, 0.45);
+  }
+  .terminal :global(.accent) {
+    color: var(--accent);
+    text-shadow: 0 0 6px rgba(247, 147, 26, 0.35);
+  }
+  .terminal :global(.ok) {
+    color: #43d445;
+    text-shadow: 0 0 6px rgba(67, 212, 69, 0.3);
+  }
+  .terminal :global(.fail) {
+    color: #ff7a6e;
+    text-shadow: 0 0 6px rgba(255, 122, 110, 0.3);
+  }
+  .terminal :global(.cyan) {
+    color: #4dd0e1;
+    text-shadow: 0 0 6px rgba(77, 208, 225, 0.25);
+  }
+  .relay-prompt {
+    margin: 0.75rem 0 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(247, 147, 26, 0.3);
+    font-size: 0.82rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .prompt-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.75rem 0 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(247, 147, 26, 0.3);
+    flex-shrink: 0;
+  }
+  .prompt-form[hidden] {
+    display: none;
+  }
+  .prompt-label {
+    font-size: 0.82rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .prompt-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--accent);
+    font: inherit;
+    font-size: 0.82rem;
+    caret-color: var(--accent);
+  }
+  .cursor {
+    animation: cursor-blink 1.1s steps(2) infinite;
+  }
+  @keyframes cursor-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  const terminal = document.querySelector<HTMLElement>("[data-terminal]");
+  if (terminal) {
+    const output = terminal.querySelector<HTMLElement>("[data-output]");
+    const staticPrompt = terminal.querySelector<HTMLElement>("[data-prompt-static]");
+    const form = terminal.querySelector<HTMLFormElement>("[data-prompt-form]");
+    const input = terminal.querySelector<HTMLInputElement>(".prompt-input");
+    const dataEl = terminal.querySelector<HTMLScriptElement>("[data-terminal-data]");
+
+    const data = dataEl ? JSON.parse(dataEl.textContent ?? "{}") : {};
+
+    type Seg = { text: string; cls?: string };
+
+    const printSegs = (segs: Seg[], containerCls?: string) => {
+      if (!output) return;
+      const line = document.createElement("p");
+      line.className = "term-line" + (containerCls ? ` ${containerCls}` : "");
+      for (const seg of segs) {
+        const span = document.createElement("span");
+        if (seg.cls) span.className = seg.cls;
+        span.textContent = seg.text;
+        line.appendChild(span);
+      }
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+    };
+
+    const print = (text: string, cls?: string) => printSegs([{ text, cls }]);
+
+    const printEcho = (text: string) => {
+      if (!output) return;
+      const line = document.createElement("p");
+      line.className = "term-line term-line--echo";
+      const span = document.createElement("span");
+      span.className = "dim";
+      span.textContent = text;
+      line.appendChild(span);
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+    };
+
+    const listRelays = () => {
+      (data.relays ?? []).forEach(
+        (r: { ok: boolean; host: string; latencyMs: number | null; totalEvents: number }) => {
+          printSegs([
+            { text: r.ok ? "[OK] " : "[FAIL] ", cls: r.ok ? "ok" : "fail" },
+            { text: r.host },
+            { text: r.ok ? ` ${r.latencyMs ?? "?"}ms` : "", cls: "dim" },
+            { text: r.totalEvents > 0 ? ` · ${r.totalEvents} events` : "", cls: "dim" },
+          ]);
+        }
+      );
+    };
+
+    const showRelayDetail = (query: string): boolean => {
+      const relays = data.relays ?? [];
+      const match = relays.find((r: { host: string }) => r.host.includes(query));
+      if (!match) return false;
+      printSegs([{ text: match.host, cls: "cyan" }]);
+      printSegs([{ text: "  url:     ", cls: "dim" }, { text: match.url }]);
+      if (match.nip11?.name)
+        printSegs([{ text: "  name:    ", cls: "dim" }, { text: match.nip11.name }]);
+      if (match.nip11?.software)
+        printSegs([
+          { text: "  software: ", cls: "dim" },
+          { text: match.nip11.software + (match.nip11.version ? ` · ${match.nip11.version}` : "") },
+        ]);
+      if (match.nip11?.contact)
+        printSegs([{ text: "  contact: ", cls: "dim" }, { text: match.nip11.contact }]);
+      if (match.nip11?.nips)
+        printSegs([{ text: "  nips:    ", cls: "dim" }, { text: match.nip11.nips, cls: "cyan" }]);
+      if (match.nip11?.limits)
+        printSegs([{ text: "  limits:  ", cls: "dim" }, { text: match.nip11.limits }]);
+      printSegs([
+        { text: "  probe:   ", cls: "dim" },
+        {
+          text: match.ok
+            ? `connect ${match.latencyMs ?? "?"}ms`
+            : `fail: ${match.error ?? "unknown"}`,
+          cls: match.ok ? "ok" : "fail",
+        },
+      ]);
+      printSegs([{ text: "  holds:   ", cls: "dim" }, { text: match.holds, cls: "accent" }]);
+      return true;
+    };
+
+    const COMMANDS: Record<string, (args: string) => void> = {
+      help: () => {
+        printSegs([
+          { text: "commands: ", cls: "dim" },
+          { text: "help · relays [host] · probe · sync · feed [n] · events · whoami · clear", cls: "accent" },
+        ]);
+      },
+      relays: (args: string) => {
+        if (args) {
+          if (!showRelayDetail(args)) print(`no relay matching "${args}"`, "fail");
+        } else {
+          listRelays();
+        }
+      },
+      probe: () => {
+        print(`probe snapshot from ${data.sync?.relays ?? "?"} — build-time, not live`, "dim");
+        listRelays();
+      },
+      sync: () => {
+        printSegs([{ text: "relays:   ", cls: "dim" }, { text: data.sync?.relays ?? "?" }]);
+        printSegs([{ text: "feed:     ", cls: "dim" }, { text: data.sync?.feed ?? "?" }]);
+        printSegs([{ text: "calendar: ", cls: "dim" }, { text: data.sync?.calendar ?? "?" }]);
+      },
+      feed: (args: string) => {
+        const items = data.feed ?? [];
+        const n = Math.min(parseInt(args, 10) || 3, items.length);
+        if (items.length === 0) {
+          print("feed empty (first run or genuinely empty account)", "dim");
+          return;
+        }
+        items.slice(0, n).forEach((item: { content: string }) => {
+          printSegs([
+            { text: "> ", cls: "dim" },
+            { text: item.content.replace(/\s+/g, " ").trim().slice(0, 72) },
+          ]);
+        });
+      },
+      events: () => {
+        const ev = data.events ?? {};
+        printSegs([
+          { text: "upcoming: ", cls: "dim" },
+          { text: String(ev.upcomingCount ?? 0), cls: "cyan" },
+          { text: " · past: ", cls: "dim" },
+          { text: String(ev.pastCount ?? 0), cls: "cyan" },
+        ]);
+        if (ev.next) {
+          printSegs([
+            { text: "next: ", cls: "dim" },
+            { text: ev.next.title },
+            {
+              text: ` — ${new Date(ev.next.startMs).toISOString().slice(0, 10)}`,
+              cls: "dim",
+            },
+          ]);
+        }
+      },
+      whoami: () => {
+        printSegs([
+          { text: data.whoami?.npub ?? "?", cls: "ok" },
+          { text: data.whoami?.lud16 ? ` · ${data.whoami.lud16}` : "", cls: "dim" },
+        ]);
+      },
+      clear: () => {
+        if (output) {
+          output.textContent = "";
+        }
+      },
+      satoshi: () => {
+        print("stay humble. stack sats. verify everything.", "ok");
+      },
+    };
+
+    form?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const raw = input?.value.trim() ?? "";
+      if (!raw || !input) return;
+      printEcho(`root@ufmg:~$ ${raw}`);
+      const [cmd, ...rest] = raw.split(/\s+/);
+      const fn = COMMANDS[cmd.toLowerCase()];
+      if (fn) {
+        fn(rest.join(" "));
+      } else {
+        print(`command not found: ${cmd} (try: help)`, "fail");
+      }
+      input.value = "";
+    });
+
+    if (form && input) {
+      form.hidden = false;
+      staticPrompt?.remove();
+    }
+  }
+</script>
