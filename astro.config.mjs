@@ -7,5 +7,5 @@ import { defineConfig } from "astro/config";
 //   domain, set base: "/" and update `site` accordingly.
 export default defineConfig({
   site: "https://UFMGBitcoinClub.github.io",
-  base: "/clube-bitcoin-ufmg",
+  base: "/ufmg-bitcoin-club",
 });
