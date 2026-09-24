@@ -10,8 +10,7 @@ const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvkogdzl";
       <header class="join-header">
         <h1 class="join-title">Join the Network</h1>
         <p class="join-lead">
-          Tell us a bit about yourself. We'll reach out via WhatsApp or email to
-          talk next steps.
+          Tell us a <span style="color: #f7931a">bit</span> about yourself.
         </p>
       </header>
 
@@ -33,7 +32,7 @@ const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvkogdzl";
             <input class="technical-input" type="tel" id="whatsapp" name="whatsapp" placeholder="+55 31 9XXXX-XXXX" required />
           </div>
           <div class="field">
-            <label class="field-label" for="curso">Curso (course/program) <span class="required">*</span></label>
+            <label class="field-label" for="curso">Curso <span class="required">*</span></label>
             <input class="technical-input" type="text" id="curso" name="curso" required />
           </div>
         </div>
@@ -50,7 +49,7 @@ const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvkogdzl";
 
         <div class="field">
           <label class="field-label" for="project_interest">What kind of project do you want to work on? <span class="required">*</span></label>
-          <textarea class="technical-input" id="project_interest" name="project_interest" rows="3" required></textarea>
+          <textarea class="technical-input" id="project_interest" name="project_interest" placeholder="e.g webapps, cli-tools, games" rows="3" required></textarea>
         </div>
 
         <div class="field-row">
@@ -59,7 +58,7 @@ const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvkogdzl";
             <input class="technical-input" type="text" id="npub" name="npub" placeholder="npub1..." />
           </div>
           <div class="field">
-            <label class="field-label" for="availability">Availability <span class="optional">(optional — hours/week or days)</span></label>
+            <label class="field-label" for="availability">Availability </label>
             <input class="technical-input" type="text" id="availability" name="availability" placeholder="e.g. 10 hours/week" />
           </div>
         </div>
@@ -73,7 +72,7 @@ const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvkogdzl";
         <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
 
         <div class="submit-row">
-          <button type="submit" class="btn">
+          <button type="submit" class="submit-btn">
             [ Submit application ]
             <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
           </button>
@@ -89,9 +88,9 @@ const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvkogdzl";
     margin: 2.5rem auto 3rem auto;
   }
   .join-panel {
+    color: var(--muted) 
     border: 1px solid var(--border-soft);
-    border-left: 4px solid var(--accent);
-    background: var(--bg-raised);
+    background: var(--accent-soft-bg);
     padding: 2.5rem;
   }
   .join-header {
@@ -156,5 +155,31 @@ const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvkogdzl";
     padding-top: 1.5rem;
     display: flex;
     justify-content: flex-end;
+  }
+  .technical-input {
+    background: var(--bg)
+  }
+  .submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border: 1px solid var(--border);
+    padding: 0.65rem 1.1rem;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    background: var(--bg);
+    /* color: var(--fg); */
+    box-shadow: 2px 2px 0 0 var(--border);
+    transition: transform 0.1s, box-shadow 0.1s, background-color 0.15s;
+  }
+  .submit-btn:hover {
+    background: var(--accent)
   }
 </style>
