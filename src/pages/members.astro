@@ -4,6 +4,33 @@ import MemberCard from "../components/MemberCard.astro";
 import Carousel from "../components/Carousel.astro";
 import JoinBlock from "../components/JoinBlock.astro";
 import data from "../data/members.json";
+import badgesData from "../data/badges.json";
+
+const defById = new Map(badgesData.definitions.map((d) => [d.id, d]));
+
+// badge id -> set of member pubkeys holding it
+const holdersByBadge = new Map<string, Set<string>>();
+for (const award of badgesData.awards) {
+  const set = holdersByBadge.get(award.badgeId) ?? new Set<string>();
+  set.add(award.pubkey);
+  holdersByBadge.set(award.badgeId, set);
+}
+
+const honors = [...holdersByBadge.entries()]
+  .filter(([, holders]) => holders.size > 0)
+  .map(([id, holders]) => ({
+    id,
+    name: defById.get(id)?.name ?? id,
+    holders: holders.size,
+  }))
+  .sort((a, b) => b.holders - a.holders);
+
+function badgesFor(pubkey: string): { id: string; name: string }[] {
+  return [...holdersByBadge.entries()]
+    .filter(([, holders]) => holders.has(pubkey))
+    .map(([id]) => ({ id, name: defById.get(id)?.name ?? id }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
 ---
 
 <Layout title="Members" active="members">
@@ -16,9 +43,11 @@ import data from "../data/members.json";
   </section>
 
   {data.members.length > 0 ? (
-    <Carousel ariaLabel="members">
-      {data.members.map((member) => <MemberCard member={member} />)}
-    </Carousel>
+    <section class="members-section">
+      <Carousel ariaLabel="members">
+        {data.members.map((member) => <MemberCard member={member} badges={badgesFor(member.pubkey)} />)}
+      </Carousel>
+    </section>
   ) : (
     <p class="empty">
       No members configured yet — add pubkeys in src/config/members.mjs and run
@@ -26,13 +55,75 @@ import data from "../data/members.json";
     </p>
   )}
 
+  {honors.length > 0 && (
+    <section class="honors panel--accent-left">
+      <h2 class="section-title small">Honors</h2>
+      <p class="honors-note">
+        Club-signed NIP-58 badge awards (kinds 30008/30009) — independently
+        verifiable on any Nostr client, not just this site.
+      </p>
+      <div class="honor-list">
+        {honors.map((h) => (
+          <div class="honor-row">
+            <span class="chip">[ {h.name.toUpperCase()} ]</span>
+            <span class="honor-count">
+              {h.holders} holder{h.holders === 1 ? "" : "s"}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
   <JoinBlock />
 </Layout>
 
 <style>
+  /* Floating panel — styles copied from the projects section. */
+  .members-section {
+    --carousel-fade: rgba(240, 238, 231, 0.9);
+    margin-bottom: 3rem;
+    padding: 1.25rem 1.5rem 1.5rem;
+    border-radius: 12px;
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(2px) saturate(100%);
+    border: 1px solid rgba(26, 26, 26, 0.12);
+    box-shadow:
+      0 24px 48px -16px rgba(26, 26, 26, 0.22),
+      0 12px 28px -12px rgba(26, 26, 26, 0.16),
+      0 2px 8px rgba(26, 26, 26, 0.08);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .members-section {
+      background: var(--bg-soft-fallback);
+    }
+  }
   .page-lead {
     color: var(--muted);
     max-width: 62ch;
     margin: 0;
+  }
+  .honors {
+    margin-bottom: 3rem;
+  }
+  .honors-note {
+    margin: 0 0 1rem 0;
+    font-size: 0.78rem;
+    color: var(--muted);
+    max-width: 62ch;
+  }
+  .honor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .honor-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .honor-count {
+    font-size: 0.72rem;
+    color: var(--muted);
   }
 </style>
