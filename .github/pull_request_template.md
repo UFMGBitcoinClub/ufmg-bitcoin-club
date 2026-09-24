@@ -11,8 +11,7 @@ public "member since" date on the site.
 
 **npub:** `npub1...`
 **hex pubkey:** `...64-char hex...`
-**Signed claim:** `note1...` / `nevent1...` (a kind:1 note signed with the
-key above, referencing this PR — proof that the GitHub account and the Nostr
+**Signed claim:** `note1...` / `nevent1...` (a kind:1 note signed with the key above, referencing this PR — proof that the GitHub account and the Nostr
 identity belong to the same person)
 
 ### Checklist

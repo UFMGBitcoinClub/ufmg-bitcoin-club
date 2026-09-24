@@ -23,6 +23,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history: fetch-members.mjs derives `joinedAt` from the
+          # commit that added each pubkey to the members registry.
+          fetch-depth: 0
+
+      - name: Validate members registry
+        run: node scripts/validate-members.mjs
 
       - name: Setup Node
         uses: actions/setup-node@v4
