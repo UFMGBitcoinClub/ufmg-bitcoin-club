@@ -30,3 +30,7 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# do not commit
+src/data
+
