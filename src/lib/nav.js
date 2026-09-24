@@ -3,7 +3,7 @@
 // used a different, inconsistent label set and was treated as a draft).
 export const NAV_ITEMS = [
   { key: "pow", label: "Proof of Work", href: "/proof-of-work" },
-  { key: "events", label: "Events", href: "/events" },
+  { key: "events", label: "Calendar", href: "/events" },
   { key: "members", label: "Members", href: "/members" },
   { key: "contribute", label: "Contribute", href: "/contribute" },
 ];

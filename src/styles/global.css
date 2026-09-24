@@ -2,6 +2,9 @@
   --bg: #fcf9f2;
   --bg-alt: #f0eee7;
   --bg-raised: #ffffff;
+  --bg-translucent: #f7931a57;
+  --bg-soft: rgba(240, 238, 231, 0.72);
+  --bg-soft-fallback: rgba(240, 238, 231, 0.96);
   --fg: #1a1a1a;
   --muted: #554335;
   --muted-2: #887362;
@@ -116,11 +119,29 @@ hr,
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  width: 100%;
-  background: var(--bg-alt);
-  border-bottom: 1px solid var(--border);
-  position: relative;
-  z-index: 20;
+  /* Floating glass bar: inset from the page edges, fully rounded, no
+     bottom border — the blur edge does the separation instead. */
+  background: rgba(240, 238, 231, 0.72);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(4px) saturate(250%);
+  border: 1px solid rgba(26, 26, 26, 0.12);
+  border-radius: 999px;
+  position: sticky;
+  top: 0.75rem;
+  z-index: 50;
+  margin: 0.75rem auto 0 auto;
+  padding: 0.35rem 1.1rem;
+  max-width: var(--container-max);
+  width: calc(100% - 2rem);
+  box-shadow: 0 8px 24px rgba(26, 26, 26, 0.06);
+}
+
+/* Browsers without backdrop-filter get a slightly more opaque fallback
+   so the bar never becomes unreadable. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header {
+    background: rgba(240, 238, 231, 0.96);
+  }
 }
 
 .site-header-inner {
@@ -129,17 +150,21 @@ hr,
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
-  max-width: var(--container-max);
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0.9rem 1.25rem;
+  padding: 0.35rem 0.5rem;
   width: 100%;
+}
+
+.site-header-name {
+  color: var(--accent);
 }
 
 .logo {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  color: var(--accent);
+  color: var(--muted);
   font-weight: 800;
   font-size: 1.4rem;
   text-decoration: none;
@@ -148,9 +173,13 @@ hr,
   white-space: nowrap;
 }
 
+.logo-name {
+  color: var(--accent);
+}
+
 .logo-icon {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 4rem;
+  height: 4rem;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -173,18 +202,19 @@ hr,
 }
 
 .nav-link:hover {
-  background: var(--accent-soft-bg);
-  color: var(--fg);
+  color: var(--accent-dim);
 }
 
 .nav-link--active {
   background: var(--accent);
   color: var(--accent-fg);
+  border-radius: 18px;
 }
 
 .site-footer {
+  color: var(--muted);
   width: 100%;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--accent-dim);
   background: var(--bg);
   position: relative;
   z-index: 20;
@@ -240,6 +270,13 @@ hr,
 
 .page-hero {
   margin: 2.5rem 0 2rem 0;
+  padding: 1rem 1.5rem;
+  backdrop-filter: blur(1px) saturate(100%);
+    border-radius: 12px;
+    box-shadow:
+      0 24px 48px -16px rgba(26, 26, 26, 0.22),
+      0 12px 28px -12px rgba(26, 26, 26, 0.16),
+      0 2px 8px rgba(26, 26, 26, 0.08);
 }
 
 .page-kicker {
@@ -297,14 +334,16 @@ hr,
   text-decoration: none;
   text-align: center;
   cursor: pointer;
-  background: var(--bg-raised);
+  background: var(--bg-alt);
   color: var(--fg);
-  box-shadow: 2px 2px 0 0 var(--border);
   transition: transform 0.1s, box-shadow 0.1s, background-color 0.15s;
+  border-radius: 18px;
+  box-shadow: 0 24px 48px -16px rgba(26, 26, 26, 0.22), 0 12px 28px -12px rgba(26, 26, 26, 0.16), 0 2px 8px rgba(26, 26, 26, 0.08);
 }
 
 .btn:hover {
-  background: var(--accent-soft-bg);
+  background: var(--accent);
+  border: 1px solid var(--accent-dim);
 }
 
 .btn:active {
@@ -317,7 +356,7 @@ hr,
 }
 
 .btn--outline:hover {
-  background: var(--accent-soft-bg);
+  background: var(--accent);
 }
 
 .btn--primary {
@@ -442,6 +481,7 @@ hr,
   border-bottom: 2px solid var(--accent);
   border-right: 2px solid var(--accent);
 }
+
 
 /* Dark "terminal" surface used for the relay-status panel etc. */
 .terminal-panel {
