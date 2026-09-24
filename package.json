@@ -7,11 +7,12 @@
     "dev": "astro dev",
     "build": "npm run fetch:all && astro build",
     "preview": "astro preview",
-    "fetch:all": "npm run fetch:profile && npm run fetch:notes && npm run fetch:calendar && npm run fetch:members && npm run fetch:projects && npm run fetch:relays && npm run generate:qr",
+    "fetch:all": "npm run fetch:profile && npm run fetch:notes && npm run fetch:calendar && npm run fetch:members && npm run fetch:badges && npm run fetch:projects && npm run fetch:relays && npm run generate:qr",
     "fetch:profile": "node scripts/fetch-profile.mjs",
     "fetch:notes": "node scripts/fetch-notes.mjs",
     "fetch:calendar": "node scripts/fetch-calendar.mjs",
     "fetch:members": "node scripts/fetch-members.mjs",
+    "fetch:badges": "node scripts/fetch-badges.mjs",
     "fetch:projects": "node scripts/fetch-projects.mjs",
     "fetch:relays": "node scripts/fetch-relays.mjs",
     "generate:qr": "node scripts/generate-qr.mjs"
