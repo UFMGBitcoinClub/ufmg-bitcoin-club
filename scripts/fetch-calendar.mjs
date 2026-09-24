@@ -46,6 +46,10 @@ function normalizeEvent(evt) {
 
   return {
     id: evt.id,
+    // d-tag + kind kept so attendance matching can resolve NIP-52 RSVP
+    // `a` tags ("31923:<pubkey>:<d>") against this event (additive field).
+    kind: evt.kind,
+    d,
     title,
     startMs,
     endMs,
