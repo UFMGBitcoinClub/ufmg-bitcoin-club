@@ -22,6 +22,7 @@ export interface RelayProbe {
 
 export interface Props {
   probes: RelayProbe[];
+  fallbackRelays?: string[];
   feedItems: {
     type: "note" | "repost";
     content?: string;
@@ -35,7 +36,7 @@ export interface Props {
   whoami: { npub: string | null; lud16: string | null };
 }
 
-const { probes, feedItems, calendar, sync, whoami } = Astro.props;
+const { probes, fallbackRelays, feedItems, calendar, sync, whoami } = Astro.props;
 
 const KIND_LABELS: Record<string, string> = {
   "0": "profile",
@@ -72,24 +73,37 @@ function limitsLabel(limits: Record<string, unknown>): string | null {
 
 const probeDate = sync.relays ? sync.relays.slice(0, 16).replace("T", " ") : "unknown";
 
-const relayEntries = probes.map((p) => ({
-  host: p.host,
-  url: p.url,
-  ok: p.ok,
-  latencyMs: p.latencyMs,
-  error: p.error,
-  holds: holdsLabel(p.eventCounts),
-  nip11: p.nip11
-    ? {
-        name: p.nip11.name,
-        software: shortSoftware(p.nip11.software),
-        version: p.nip11.version,
-        contact: p.nip11.contact,
-        nips: nipsLabel(p.nip11.supportedNips),
-        limits: limitsLabel(p.nip11.limits),
-      }
-    : null,
-}));
+const relayEntries =
+  probes.length > 0
+    ? probes.map((p) => ({
+        host: p.host,
+        url: p.url,
+        ok: p.ok,
+        latencyMs: p.latencyMs,
+        error: p.error,
+        holds: holdsLabel(p.eventCounts),
+        nip11: p.nip11
+          ? {
+              name: p.nip11.name,
+              software: shortSoftware(p.nip11.software),
+              version: p.nip11.version,
+              contact: p.nip11.contact,
+              nips: nipsLabel(p.nip11.supportedNips),
+              limits: limitsLabel(p.nip11.limits),
+            }
+          : null,
+        totalEvents: p.totalEvents,
+      }))
+    : (fallbackRelays ?? []).map((url) => ({
+        host: url.replace(/^wss?:\/\//, "").replace(/\/+$/, ""),
+        url,
+        ok: false,
+        latencyMs: null,
+        error: "no probe data at build time",
+        holds: "no club events found",
+        nip11: null,
+        totalEvents: 0,
+      }));
 
 const nextEvent = calendar.upcoming[0] ?? null;
 
@@ -107,57 +121,66 @@ const terminalData = {
   whoami,
 };
 const terminalDataJson = JSON.stringify(terminalData).replace(/</g, "\\u003c");
+
+const shortNpub = whoami?.npub ? `${whoami.npub.slice(0, 14)}…` : "satoshi";
+const termTitle = `${shortNpub} — club-node — 80×24`;
 ---
 
-<div class="terminal terminal-panel corner-accent" data-terminal>
-  <div class="term-scrollback" data-output>
-    <p class="term-line">
-      <span class="ok">UFMG BITCOIN CLUB</span>
-      <span class="accent"> — NETWORK TERMINAL</span>
-    </p>
-    <p class="term-line"><span class="dim">static build · data synced at {probeDate}</span></p>
-    <p class="term-line"><span class="dim">type 'help' for commands</span></p>
+<div class="terminal" data-terminal>
+  <div class="terminal-titlebar">
+    <div class="terminal-lights" aria-hidden="true">
+      <span class="traffic-light close"></span>
+      <span class="traffic-light minimize"></span>
+      <span class="traffic-light zoom"></span>
+    </div>
+    <span class="title">{termTitle}</span>
+    <span class="titlebar-spacer" aria-hidden="true"></span>
   </div>
+  <div class="terminal-body">
+    <div class="term-scrollback" data-output>
+      <p class="term-line">
+        <span class="ok">NETWORK TELEMETRY</span>
+      </p>
+      <p class="term-line"><span class="dim">static build · data synced at {probeDate}</span></p>
+      <p class="term-line"><span class="dim">type 'help' for commands</span></p>
+    </div>
 
-  <p class="relay-prompt" data-prompt-static>
-    root@ufmg:~$ <span class="cursor">_</span>
-  </p>
-  <form class="prompt-form" data-prompt-form hidden>
-    <label class="prompt-label" for="terminal-prompt">root@ufmg:~$</label>
-    <input
-      id="terminal-prompt"
-      class="prompt-input"
-      type="text"
-      autocomplete="off"
-      spellcheck="false"
-      aria-label="Terminal command"
-    />
-    <span class="cursor accent">_</span>
-  </form>
+    <p class="relay-prompt" data-prompt-static>
+      root@ufmg:~$ <span class="cursor">_</span>
+    </p>
+    <form class="prompt-form" data-prompt-form hidden>
+      <label class="prompt-label" for="terminal-prompt">root@ufmg:~$</label>
+      <input
+        id="terminal-prompt"
+        class="prompt-input"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Terminal command"
+      />
+      <span class="cursor accent">_</span>
+    </form>
 
-  <script type="application/json" data-terminal-data set:html={terminalDataJson} />
+    <script type="application/json" data-terminal-data set:html={terminalDataJson} />
+  </div>
 </div>
 
 <style>
-  .terminal {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    max-width: 100%;
-    overflow: hidden;
-  }
+  /* CRT scanline overlay on the dark window surface. The window chrome
+     itself (.terminal, titlebar, traffic lights) lives in global.css. */
   .terminal::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
+    z-index: 2;
     background: repeating-linear-gradient(
       0deg,
       rgba(252, 249, 242, 0.025) 0 1px,
       transparent 1px 3px
     );
   }
+
   .term-scrollback {
     flex: 1;
     min-height: 0;
@@ -177,6 +200,7 @@ const terminalDataJson = JSON.stringify(terminalData).replace(/</g, "\\u003c");
   .term-scrollback::-webkit-scrollbar-thumb {
     background: rgba(247, 147, 26, 0.6);
   }
+
   /* JS-created nodes (print()) carry no Astro scope attribute, so every
      rule they must match is :global underneath the scoped .terminal root. */
   .terminal :global(.term-line) {
@@ -208,6 +232,7 @@ const terminalDataJson = JSON.stringify(terminalData).replace(/</g, "\\u003c");
     color: #4dd0e1;
     text-shadow: 0 0 6px rgba(77, 208, 225, 0.25);
   }
+
   .relay-prompt {
     margin: 0.75rem 0 0 0;
     padding-top: 0.75rem;
