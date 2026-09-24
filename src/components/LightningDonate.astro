@@ -5,7 +5,7 @@ import { LIGHTNING_ADDRESS, NODE_PUBKEY_DISPLAY } from "../config/contribute.mjs
 
 <div class="lightning-panel">
   <div class="qr-side">
-    <p class="mono-label">// Execute: lightning_invoice</p>
+    <p class="mono-label" styles="color: var(--accent)">// lightning_invoice</p>
     <div class="qr-frame">
       {qr.svg ? (
         <Fragment set:html={qr.svg} />
@@ -32,7 +32,7 @@ import { LIGHTNING_ADDRESS, NODE_PUBKEY_DISPLAY } from "../config/contribute.mjs
       <div class="lightning-address-row">
         <code>{LIGHTNING_ADDRESS}</code>
       </div>
-      <button class="btn copy-btn" type="button" data-copy-address={LIGHTNING_ADDRESS}>
+      <button class="btn copy-btn btn--dark" type="button" data-copy-address={LIGHTNING_ADDRESS}>
         <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
         <span data-copy-label>[ Copy address ]</span>
       </button>
@@ -49,8 +49,11 @@ import { LIGHTNING_ADDRESS, NODE_PUBKEY_DISPLAY } from "../config/contribute.mjs
   .lightning-panel {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    border: 1px solid var(--border-soft);
-    background: var(--bg-raised);
+    background: transparent;
+    border-radius: 12px;
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(2px) saturate(100%);
+    box-shadow: 0 24px 48px -16px rgba(26, 26, 26, 0.22), 0 12px 28px -12px rgba(26, 26, 26, 0.16), 0 2px 8px rgba(26, 26, 26, 0.08);
   }
   .qr-side {
     padding: 2rem;
@@ -109,6 +112,7 @@ import { LIGHTNING_ADDRESS, NODE_PUBKEY_DISPLAY } from "../config/contribute.mjs
     flex-direction: column;
     gap: 1.25rem;
     justify-content: center;
+    background: var(--bg)
   }
   .info-side p {
     margin: 0;

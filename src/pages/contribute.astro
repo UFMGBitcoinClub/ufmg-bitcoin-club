@@ -7,7 +7,7 @@ const helpItems = [
     icon: "code",
     title: "Code",
     description:
-      "Contribute PRs to our open-source tools, Nostr client interfaces, and data visualization repos.",
+      "Contribute PRs to our open-source tools or start a new project.",
     linkLabel: "View GitHub",
     linkUrl: "#",
   },
@@ -15,7 +15,7 @@ const helpItems = [
     icon: "menu_book",
     title: "Research",
     description:
-      "Submit whitepapers, protocol analysis, or cryptographic reviews to our peer-reviewed archive.",
+      "Submit whitepapers, protocol analysis, or cryptographic reviews to open source tools.",
     linkLabel: "Read papers",
     linkUrl: "#",
   },
@@ -28,25 +28,57 @@ const helpItems = [
     linkUrl: "#",
   },
 ];
+
+const communityLinks = [
+  { name: "bitcoin.org", desc: "The whitepaper, protocol documentation and resources", href: "https://bitcoin.org" },
+  { name: "delvingbitcoin.org", desc: "Deep technical research and design discussion", href: "https://delvingbitcoin.org" },
+  { name: "bitcointalk.org", desc: "The original forum — running since 2009", href: "https://bitcointalk.org" },
+  { name: "bitcoinops.org", desc: "Bitcoin Optech — weekly technical newsletters", href: "https://bitcoinops.org" },
+  { name: "github.com/bitcoin/bitcoin", desc: "Bitcoin Core, the reference implementation", href: "https://github.com/bitcoin/bitcoin" },
+  { name: "vinteum.org", desc: "A Bitcoin R&D Center in Brazil", href: "https://vinteum.org" },
+];
 ---
 
 <Layout title="Contribute" active="contribute">
-  <section class="page-hero">
-    <h1 class="page-title">Contribute to the Network</h1>
-    <p class="page-lead">
-      &gt; Initializing contribution protocol...<br />
-      &gt; Sovereign research requires uncompromised funding and
-      collaborative rigor. Support the pursuit of hard money and
-      open-source infrastructure.
-    </p>
-  </section>
+  <header class="contribute-hero page-hero">
+    <div class="hero-text">
+      <h1 class="page-title">Contribute to the Network</h1>
+      <p class="page-lead">
+        Bitcoin development is open source in its purest form: distributed,
+        permissionless, and merit-driven. There is no office and no
+        gatekeeper — review happens in public, consensus is earned through
+        verifiable work, and anyone on the planet can propose a change to
+        the base layer of money. It is a working style unlike anything
+        else: your reputation is your commit history.
+      </p>
+    </div>
+
+    <aside class="community-links corner-accent" aria-label="Bitcoin community links">
+      <div class="links-viewport">
+        <div class="links-scroll">
+          <ul>
+            {communityLinks.map((link) => (
+              <li>
+                <a href={link.href} target="_blank" rel="noopener noreferrer">
+                  <span class="link-name">&gt; {link.name}</span>
+                  <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                </a>
+                <span class="link-desc">{link.desc}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div class="links-fade" aria-hidden="true"></div>
+      </div>
+    </aside>
+  </header>
 
   <section class="contribute-grid">
     <LightningDonate />
   </section>
 
   <section class="help-section">
-    <h2 class="section-title small">Other vectors of contribution</h2>
+    <h2 class="section-title small">Other ways to contribute</h2>
     <div class="grid-3">
       {helpItems.map((item) => (
         <div class="help-card">
@@ -61,23 +93,135 @@ const helpItems = [
 </Layout>
 
 <style>
-  .page-hero {
-    text-align: center;
+  .contribute-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 2.5rem;
+    align-items: stretch;
+    margin: 1.5rem 0 2rem 0;
+    border-left: 4px solid var(--accent);
+    padding-left: 1.5rem;
   }
-  .page-lead {
+  .community-links {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.25rem;
+  }
+  .community-links .mono-label {
+    margin: 0 0 0.75rem 0;
+    flex-shrink: 0;
+  }
+  /* Viewport owns the height (flexes with the hero, capped) and anchors
+     the fade to the true bottom edge of the scrolling region. */
+  .links-viewport {
+    position: relative;
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: 340px;
+    display: flex;
+  }
+  .links-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+  }
+  .links-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .links-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .links-scroll::-webkit-scrollbar-thumb {
+    background: rgba(247, 147, 26, 0.6);
+  }
+  .community-links ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .links-fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48px;
+    z-index: 1;
+    background: linear-gradient(
+      to bottom,
+      rgba(252, 249, 242, 0),
+      rgba(252, 249, 242, 0.95)
+    );
+    pointer-events: none;
+  }
+  .community-links li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+  .community-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  .community-links a:hover .link-name {
+    color: var(--accent);
+  }
+  .community-links a .material-symbols-outlined {
+    font-size: 12px;
+    color: var(--muted-2);
+  }
+  .link-name {
+    color: var(--muted);
+    transition: color 0.15s;
+  }
+  .link-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    opacity: 0.8;
+  }
+  .hero-text .page-lead {
     color: var(--muted);
     max-width: 62ch;
-    border-left: 2px solid var(--accent);
-    padding: 1rem 1.25rem;
-    background: var(--bg-alt);
-    text-align: left;
-    margin: 0 auto;
+    margin: 0;
+  }
+  @media (max-width: 768px) {
+    .contribute-hero {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    /* Single column: the panel is auto-height, so restore content-based
+       sizing (capped) instead of flex-fill. */
+    .links-viewport {
+      flex: 0 1 auto;
+    }
   }
   .contribute-grid {
     margin-bottom: 3rem;
+    border-radius: 12px;
+    -webkit-backdrop-filter: blur(1px) saturate(100%);
+    backdrop-filter: blur(1px) saturate(100%);
+    
+    box-shadow: 0 24px 48px -16px rgba(26, 26, 26, 0.22), 0 12px 28px -12px rgba(26, 26, 26, 0.16), 0 2px 8px rgba(26, 26, 26, 0.08);
   }
   .help-section {
     margin-bottom: 3rem;
+    padding: 1rem;
+    backdrop-filter: blur(1px) saturate(100%);
+    border-radius: 12px;
+    box-shadow: 0 24px 48px -16px rgba(26, 26, 26, 0.22), 0 12px 28px -12px rgba(26, 26, 26, 0.16), 0 2px 8px rgba(26, 26, 26, 0.08);
+    
   }
   .help-card {
     position: relative;
@@ -85,7 +229,7 @@ const helpItems = [
     display: flex;
     flex-direction: column;
     border: 1px solid var(--muted-2);
-    background: var(--bg-raised);
+    background: var(--bg);
   }
   .help-card::before {
     content: "";
