@@ -1,8 +1,6 @@
 ---
 // Generic horizontal "passable" list. The scrolling itself is pure CSS
 // (scroll-snap) so it works by touch/trackpad/keyboard with zero JS.
-// The script below only adds prev/next buttons as an enhancement —
-// if JS fails to load, visitors can still swipe or scroll through.
 export interface Props {
   ariaLabel: string;
 }
@@ -10,21 +8,35 @@ export interface Props {
 const { ariaLabel } = Astro.props;
 ---
 
-<div class="carousel" data-carousel>
-  <button class="carousel-btn carousel-btn--prev" data-carousel-prev aria-label={`Previous ${ariaLabel}`}>
-    ‹
-  </button>
+<div class="carousel" aria-label={ariaLabel}>
   <div class="carousel-track" data-carousel-track>
     <slot />
   </div>
-  <button class="carousel-btn carousel-btn--next" data-carousel-next aria-label={`Next ${ariaLabel}`}>
-    ›
-  </button>
 </div>
 
 <style>
   .carousel {
     position: relative;
+  }
+  /* Edge fades hinting there's more to scroll sideways. Pages can
+     override --carousel-fade to blend with a tinted panel background. */
+  .carousel::before,
+  .carousel::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2.5rem;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .carousel::before {
+    left: 0;
+    background: linear-gradient(to right, var(--carousel-fade, rgba(252, 249, 242, 0.95)), rgba(252, 249, 242, 0));
+  }
+  .carousel::after {
+    right: 0;
+    background: linear-gradient(to left, var(--carousel-fade, rgba(252, 249, 242, 0.95)), rgba(252, 249, 242, 0));
   }
   .carousel-track {
     display: flex;
@@ -52,65 +64,4 @@ const { ariaLabel } = Astro.props;
     flex: 0 0 auto;
     width: min(320px, 82vw);
   }
-  .carousel-btn {
-    display: none;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-    width: 2.25rem;
-    height: 2.25rem;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border);
-    background: var(--bg-raised);
-    color: var(--fg);
-    font-size: 1.2rem;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 2px 2px 0 0 var(--border);
-  }
-  .carousel-btn:hover {
-    background: var(--accent-soft-bg);
-  }
-  /* Buttons only appear once the enhancement script confirms it's
-     wired up — keeps no-JS visitors from seeing dead controls. */
-  .carousel[data-enhanced] .carousel-btn {
-    display: flex;
-  }
-  .carousel-btn--prev {
-    left: -0.9rem;
-  }
-  .carousel-btn--next {
-    right: -0.9rem;
-  }
-  @media (max-width: 640px) {
-    .carousel-btn {
-      display: none !important;
-    }
-  }
 </style>
-
-<script>
-  document.querySelectorAll<HTMLElement>("[data-carousel]").forEach((carousel) => {
-    const track = carousel.querySelector<HTMLElement>("[data-carousel-track]");
-    const prevBtn = carousel.querySelector<HTMLButtonElement>("[data-carousel-prev]");
-    const nextBtn = carousel.querySelector<HTMLButtonElement>("[data-carousel-next]");
-    if (!track || !prevBtn || !nextBtn) return;
-
-    carousel.setAttribute("data-enhanced", "");
-
-    const step = () => {
-      const firstCard = track.firstElementChild as HTMLElement | null;
-      const gap = 24; // matches .carousel-track gap
-      return firstCard ? firstCard.getBoundingClientRect().width + gap : track.clientWidth;
-    };
-
-    prevBtn.addEventListener("click", () => {
-      track.scrollBy({ left: -step(), behavior: "smooth" });
-    });
-    nextBtn.addEventListener("click", () => {
-      track.scrollBy({ left: step(), behavior: "smooth" });
-    });
-  });
-</script>

@@ -14,14 +14,12 @@ const typeCounts = PROJECT_TYPES.map((key) => ({
 
 <Layout title="Proof of Work" active="pow">
   <section class="page-hero panel--accent-left">
-    <p class="page-kicker">:: SYS.DIR.QUERY( "PROOF_OF_WORK" )</p>
     <h1 class="page-title">Proof of Work</h1>
     <p class="page-lead">
-      An immutable directory of ongoing research, engineering deployments, and
-      theoretical formulations conducted by network participants.
+      An immutable directory of ongoing research, Proof of Concepts, PR and all other work conducted by Club participants.
     </p>
   </section>
-
+  
   {data.projects.length > 0 ? (
     <section class="projects-section">
       <div class="filter-bar" role="tablist" aria-label="Filter projects by type">
@@ -34,6 +32,8 @@ const typeCounts = PROJECT_TYPES.map((key) => ({
           </button>
         ))}
       </div>
+
+      <p style="color: var(--accent)"class="page-kicker">:: SYS.DIR.QUERY( PROJECTS )</p>
 
       <Carousel ariaLabel="projects">
         {data.projects.map((project) => <ProjectCard project={project} />)}
@@ -49,8 +49,24 @@ const typeCounts = PROJECT_TYPES.map((key) => ({
 </Layout>
 
 <style>
+  /* Floating glass panel matching the home feed section. */
   .projects-section {
+    --carousel-fade: rgba(240, 238, 231, 0.9);
     margin-bottom: 3rem;
+    padding: 1.25rem 1.5rem 1.5rem;
+    border-radius: 12px;
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(2px) saturate(100%);
+    border: 1px solid rgba(26, 26, 26, 0.12);
+    box-shadow:
+      0 24px 48px -16px rgba(26, 26, 26, 0.22),
+      0 12px 28px -12px rgba(26, 26, 26, 0.16),
+      0 2px 8px rgba(26, 26, 26, 0.08);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .projects-section {
+      background: var(--bg-soft-fallback);
+    }
   }
   .page-lead {
     color: var(--muted);
@@ -62,9 +78,9 @@ const typeCounts = PROJECT_TYPES.map((key) => ({
     gap: 1.25rem;
     flex-wrap: wrap;
     overflow-x: auto;
-    margin: 2rem 0 1.5rem 0;
+    margin: 0 0 1.25rem 0;
     padding-bottom: 0.6rem;
-    border-bottom: 1px solid var(--border-soft);
+    border-bottom: 1px solid rgba(26, 26, 26, 0.12);
   }
   .filter-btn {
     font-family: inherit;
