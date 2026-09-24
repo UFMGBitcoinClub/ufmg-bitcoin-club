@@ -28,9 +28,6 @@ jobs:
           # commit that added each pubkey to the members registry.
           fetch-depth: 0
 
-      - name: Validate members registry
-        run: node scripts/validate-members.mjs
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -39,6 +36,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Validate members registry
+        run: node scripts/validate-members.mjs
 
       - name: Fetch Nostr data + generate QR
         run: npm run fetch:all
