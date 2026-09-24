@@ -22,7 +22,6 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
 
 <Layout title="Events" active="events">
   <section class="page-hero panel--accent-left">
-    <p class="page-kicker">:: SYS.DIR.QUERY( EVENTS )</p>
     <h1 class="page-title">Events &amp; Symposia</h1>
     <p class="page-lead">
       Our calendar of seminars, workshops, and meetings 
@@ -30,7 +29,7 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
   </section>
 
   {hasEvents ? (
-    <>
+    <section class="events-panel">
       <div class="filter-bar" role="tablist" aria-label="Filter events by category">
         <button class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">
           [[ ALL EVENTS ]] <span class="filter-count">{allEvents.length}</span>
@@ -42,16 +41,31 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
         ))}
       </div>
 
-      <section class="events-list" data-events-grid>
-        {calendar.upcoming.map((event) => (
-          <EventCard event={event} status="upcoming" />
-        ))}
-        {calendar.past.map((event) => (
-          <EventCard event={event} status="past" />
-        ))}
-        <p class="empty" data-events-empty hidden>No events in this category yet.</p>
-      </section>
-    </>
+      <p style="color: var(--accent)"class="page-kicker">:: SYS.DIR.QUERY( EVENTS )</p>
+
+      <div class="events-wrap">
+        <div class="events-list" data-events-grid>
+          {calendar.upcoming.length > 0 && (
+            <section class="events-group" data-group="upcoming">
+              <h2 class="events-group-label events-group-label--upcoming">[ Upcoming ]</h2>
+              {calendar.upcoming.map((event) => (
+                <EventCard event={event} status="upcoming" />
+              ))}
+            </section>
+          )}
+          {calendar.past.length > 0 && (
+            <section class="events-group" data-group="past">
+              <h2 class="events-group-label events-group-label--past">[ Past ]</h2>
+              {calendar.past.map((event) => (
+                <EventCard event={event} status="past" />
+              ))}
+            </section>
+          )}
+          <p class="empty" data-events-empty hidden>No events in this category yet.</p>
+        </div>
+        <div class="events-fade" aria-hidden="true"></div>
+      </div>
+    </section>
   ) : (
     <p class="empty">
       No events published yet — once the manager posts a NIP-52 calendar event, it
@@ -61,6 +75,25 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
 </Layout>
 
 <style>
+  /* Floating glass panel matching the projects section. */
+  .events-panel {
+    margin-bottom: 3rem;
+    padding: 1.25rem 1.5rem 1.5rem;
+    border-radius: 12px;
+    
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(1px) saturate(100%);
+    border: 1px solid rgba(26, 26, 26, 0.12);
+    box-shadow:
+      0 24px 48px -16px rgba(26, 26, 26, 0.22),
+      0 12px 28px -12px rgba(26, 26, 26, 0.16),
+      0 2px 8px rgba(26, 26, 26, 0.08);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .events-panel {
+      background: var(--bg-soft-fallback);
+    }
+  }
   .page-lead {
     color: var(--muted);
     max-width: 62ch;
@@ -71,9 +104,9 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
     gap: 1.25rem;
     flex-wrap: wrap;
     overflow-x: auto;
-    margin: 2rem 0 1.5rem 0;
+    margin: 0 0 1.25rem 0;
     padding-bottom: 0.6rem;
-    border-bottom: 1px solid var(--border-soft);
+    border-bottom: 1px solid rgba(26, 26, 26, 0.12);
   }
   .filter-btn {
     font-family: inherit;
@@ -98,26 +131,56 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
     opacity: 0.7;
     margin-left: 0.3rem;
   }
+  .events-wrap {
+    position: relative;
+  }
   .events-list {
-    margin-bottom: 3rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
     max-height: 600px;
     overflow-y: auto;
     padding-right: 0.5rem;
     scroll-snap-type: y proximity;
     scrollbar-width: thin;
-    scrollbar-color: var(--accent) var(--bg-alt);
+    scrollbar-color: var(--accent) transparent;
   }
   .events-list::-webkit-scrollbar {
     width: 8px;
   }
   .events-list::-webkit-scrollbar-track {
-    background: var(--bg-alt);
+    background: transparent;
   }
   .events-list::-webkit-scrollbar-thumb {
     background: var(--accent);
+  }
+  .events-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .events-group[hidden] {
+    display: none;
+  }
+  .events-group-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .events-group-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(26, 26, 26, 0.12);
+  }
+  .events-group-label--past {
+    color: var(--muted-2);
   }
   .events-list :global(.event-card) {
     scroll-snap-align: start;
@@ -125,6 +188,19 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
   }
   .events-list :global(.event-card[hidden]) {
     display: none;
+  }
+  .events-fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48px;
+    background: linear-gradient(
+      to bottom,
+      rgba(240, 238, 231, 0),
+      rgba(240, 238, 231, 0.92)
+    );
+    pointer-events: none;
   }
 </style>
 
@@ -141,6 +217,7 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
   const cards = document.querySelectorAll<HTMLElement>(
     "[data-events-grid] .event-card"
   );
+  const groups = document.querySelectorAll<HTMLElement>("[data-group]");
   const emptyMessage = document.querySelector<HTMLElement>("[data-events-empty]");
 
   filterButtons.forEach((button) => {
@@ -161,6 +238,14 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
           (stem !== undefined && tags.some((t) => t.startsWith(stem)));
         card.hidden = !matches;
         if (matches) visible += 1;
+      });
+
+      // Collapse an Upcoming/Past section (including its divider label)
+      // when the current category filter leaves it without visible cards.
+      groups.forEach((group) => {
+        const groupCards = group.querySelectorAll<HTMLElement>(".event-card");
+        const anyVisible = Array.from(groupCards).some((c) => !c.hidden);
+        group.hidden = !anyVisible;
       });
 
       if (emptyMessage) emptyMessage.hidden = visible > 0;

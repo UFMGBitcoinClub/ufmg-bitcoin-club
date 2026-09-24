@@ -30,28 +30,30 @@ const timeLabel = event.dateOnly
       timeZoneName: "short",
     }).format(new Date(event.startMs));
 
-// External link only — opens the raw calendar event on a public Nostr
-// viewer, which lets the visitor's own client take over. No signing or
-// wallet-connect happens on this site (architecture.md §2).
+function shortId(id: string): string {
+  return `${id.slice(0, 8)}...${id.slice(-4)}`;
+}
+
+// External link — opens the raw calendar event on a public Nostr
+// viewer, which lets the visitor's own client take over.
 const nostrLink = `https://njump.me/${event.id}`;
 ---
 
 <article
-  class={`event-card ${isPast ? "event-card--past" : ""}`}
+  class={`event-card panel--accent-left ${isPast ? "event-card--past" : ""}`}
   data-tags={event.tags.map((t) => t.toLowerCase()).join(" ")}
 >
-  <div class="event-dot" aria-hidden="true"></div>
   <div class="event-head">
     <div class="event-head-left">
       <div class="event-head-tags">
-        {event.tags.length > 0 && (
-          <span class="event-type">&lt; {event.tags[0].toUpperCase()} &gt;</span>
-        )}
-        <span class={`badge ${isPast ? "badge--archived" : "badge--active"}`}>
-          {isPast ? "[ PAST ]" : "[ UPCOMING ]"}
-        </span>
+        
       </div>
       <h3 class="event-title">{event.title}</h3>
+      {event.tags.length > 0 && (
+        <div class="event-tags">
+          {event.tags.map((t) => <span class="event-tag">#{t}</span>)}
+        </div>
+      )}
     </div>
     <div class="event-when">
       <p class="event-date">
@@ -70,15 +72,9 @@ const nostrLink = `https://njump.me/${event.id}`;
   <p class="event-description">{event.description}</p>
 
   <div class="event-meta-row">
-    <span>EVENT ID: {event.id.slice(0, 10)}...{event.id.slice(-4)}</span>
-    {event.tags.length > 0 && (
-      <span>TAGS: {event.tags.map((t) => `#${t}`).join(" ")}</span>
-    )}
-  </div>
-
-  <div class="event-action">
+    <span class="event-id" title={event.id}>EVENT ID: {shortId(event.id)}</span>
     <a class="view-external" href={nostrLink} target="_blank" rel="noopener noreferrer">
-      <span class="view-external-text">[ VIEW EXTERNAL ]</span>
+      <span class="view-external-text">[ VIEW ]</span>
       <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
     </a>
   </div>
@@ -87,29 +83,26 @@ const nostrLink = `https://njump.me/${event.id}`;
 <style>
   .event-card {
     position: relative;
-    padding: 1.5rem 0 1.5rem 1.25rem;
-    border-left: 4px solid var(--accent);
-    border-bottom: 1px solid var(--border-soft);
+    padding: 1.25rem 1.375rem;
+    border-radius: 12px;
+    background: var(--accent-soft-bg);
+    box-shadow:
+      0 10px 24px -14px rgba(23, 19, 13, 0.28),
+      0 2px 6px -2px rgba(23, 19, 13, 0.12);
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease,
+      border-color 0.18s ease;
   }
-  .event-dot {
-    display: none;
-  }
-  .event-head-tags {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-  }
-  .event-type {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--muted);
+  .event-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow:
+      0 16px 32px -14px rgba(23, 19, 13, 0.35),
+      0 4px 10px -4px rgba(23, 19, 13, 0.15);
   }
   .event-card--past {
-    border-left-color: var(--border-soft);
-    opacity: 0.85;
+    background: var(--badge-archived-bg);
   }
   .event-head {
     display: flex;
@@ -123,14 +116,35 @@ const nostrLink = `https://njump.me/${event.id}`;
     flex-direction: column;
     gap: 0.5rem;
     align-items: flex-start;
+    min-width: 0;
+  }
+  .event-head-tags .badge {
+    border-radius: 999px;
   }
   .event-title {
     text-transform: uppercase;
-    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+    font-size: 1.1rem;
     margin: 0;
   }
   .event-card--past .event-title {
     color: var(--muted);
+  }
+  .event-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .event-tag {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    color: var(--accent-dim);
+    background: var(--bg-raised);
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
   }
   .event-when {
     font-size: 0.8rem;
@@ -147,25 +161,6 @@ const nostrLink = `https://njump.me/${event.id}`;
   .event-location {
     margin: 0;
   }
-  .event-description {
-    margin: 0 0 1rem 0;
-    max-width: 62ch;
-    color: var(--muted);
-  }
-  .event-meta-row {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    background: var(--bg-alt);
-    padding: 0.6rem 0.9rem;
-    font-size: 0.72rem;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
-  .event-action {
-    display: flex;
-    justify-content: flex-end;
-  }
   .event-date .material-symbols-outlined,
   .event-location .material-symbols-outlined {
     font-size: 14px;
@@ -175,29 +170,64 @@ const nostrLink = `https://njump.me/${event.id}`;
   .event-card:not(.event-card--past) .event-date .material-symbols-outlined {
     color: var(--accent);
   }
+  .event-description {
+    margin: 0 0 1rem 0;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+  .event-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding-top: 0.75rem;
+    border-top: 1px dashed var(--border-soft);
+    font-size: 0.72rem;
+    color: var(--muted-2);
+  }
+  .event-id {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .view-external {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    background: var(--bg-raised);
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      color 0.15s,
+      border-color 0.15s,
+      background-color 0.15s;
+  }
+  .view-external .material-symbols-outlined {
+    font-size: 0.9rem;
+  }
+  .view-external:hover {
+    color: var(--accent-dim);
+    border-color: var(--accent);
+    background: var(--accent-soft-bg);
+  }
   @media (min-width: 769px) {
-    .event-dot {
-      display: block;
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 8px;
-      height: 8px;
-      background: var(--fg);
-      transition: background-color 0.15s;
-    }
-    .event-card--past .event-dot {
-      background: var(--border-soft);
-    }
-    .event-card:hover .event-dot {
-      background: var(--accent);
-    }
     .event-head {
       flex-direction: row;
       align-items: flex-start;
     }
     .event-when {
       text-align: right;
+      flex-shrink: 0;
     }
   }
 </style>
