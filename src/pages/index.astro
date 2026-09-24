@@ -11,6 +11,7 @@ import feed from "../data/feed.json";
 import projects from "../data/projects.json";
 import calendar from "../data/calendar.json";
 import relayData from "../data/relays.json";
+import members from "../data/members.json";
 
 const displayName = profile.display_name || profile.name || "Clube Bitcoin UFMG";
 const about =
@@ -21,6 +22,17 @@ const projectsCount = projects.projects.length;
 const eventsCount = calendar.upcoming.length + calendar.past.length;
 const recentItems = (feed.items ?? []).slice(0, 8);
 const profilePicture = profile.picture ?? null;
+
+// pubkey → display name map so note cards show a human-readable author
+// (club profile first, then the member roster) instead of raw pubkeys.
+const authorNames: Record<string, string> = {};
+if (profile.pubkey) {
+  authorNames[profile.pubkey] =
+    profile.display_name || profile.name || "Clube Bitcoin UFMG";
+}
+for (const member of members.members ?? []) {
+  if (member.pubkey && member.name) authorNames[member.pubkey] = member.name;
+}
 
 let clubNpub: string | null = null;
 try {
@@ -69,7 +81,9 @@ try {
       </div>
       <div class="feed-scroll">
         {recentItems.length > 0 ? (
-          recentItems.map((item) => <NoteCard item={item} avatarUrl={profilePicture} />)
+          recentItems.map((item) => (
+            <NoteCard item={item} avatarUrl={profilePicture} authorNames={authorNames} />
+          ))
         ) : (
           <p class="empty">No posts fetched yet.</p>
         )}
@@ -124,9 +138,19 @@ try {
 
   .activity-feed {
     position: relative;
-    border: 1px solid var(--border-soft);
-    background: transparent;
+    border-radius: 12px;
+    border: 1px solid rgba(26, 26, 26, 0.12);
     overflow: hidden;
+    backdrop-filter: blur(1px) saturate(100%);
+    box-shadow:
+      0 24px 48px -16px rgba(26, 26, 26, 0.22),
+      0 12px 28px -12px rgba(26, 26, 26, 0.16),
+      0 2px 8px rgba(26, 26, 26, 0.08);
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .activity-feed {
+      background: var(--bg-soft-fallback);
+    }
   }
   .feed-kicker {
     margin: 0;
@@ -144,15 +168,22 @@ try {
     align-items: flex-start;
     gap: 0.75rem;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border-soft);
-    background: transparent;
+    background: var(--bg-soft);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(4px) saturate(250%);
+    border-bottom: 1px solid rgba(26, 26, 26, 0.12);
     flex-shrink: 0;
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .feed-head {
+      background: var(--bg-soft-fallback);
+    }
   }
   .feed-head-text {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
-    color: var(--accent)
+    color: var(--muted)
   }
   .feed-head .section-title.small {
     border-bottom: none;
@@ -201,7 +232,7 @@ try {
   }
 
   /* Subtle fade at the bottom edge to hint there's more to scroll.
-     Semi-transparent page tint so the grid shows through. */
+     Fades into the soft page background instead of black. */
   .feed-fade {
     position: absolute;
     left: 0;
@@ -210,9 +241,10 @@ try {
     height: 40px;
     background: linear-gradient(
       to bottom,
-      rgba(252, 249, 242, 0),
-      rgba(252, 249, 242, 0.92)
+      rgba(240, 238, 231, 0),
+      rgba(240, 238, 231, 0.92)
     );
     pointer-events: none;
   }
+
 </style>
