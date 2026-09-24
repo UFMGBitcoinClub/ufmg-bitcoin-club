@@ -20,7 +20,6 @@ function shortPubkey(pk: string): string {
 
 <section class="hero panel--accent-left">
   <div class="hero-text">
-    <h1 class="hero-title">{displayName}</h1>
     <p class="hero-about">{about}</p>
     <div class="hero-actions">
       <a class="btn btn--dark" href={withBase("/manifesto")}>
@@ -43,7 +42,18 @@ function shortPubkey(pk: string): string {
 <section class="stat-bar">
   <div class="stat">
     <span class="mono-label">PubKey</span>
-    <span class="stat-value stat-value--pubkey">{shortPubkey(pubkey)}</span>
+    <span class="stat-value stat-value--pubkey">
+      {shortPubkey(pubkey)}
+      <button
+        class="copy-icon"
+        type="button"
+        data-copy-pubkey={pubkey}
+        aria-label="Copy full club pubkey"
+        title="Copy full pubkey"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+      </button>
+    </span>
   </div>
   <div class="stat">
     <span class="mono-label">Projects</span>
@@ -125,7 +135,25 @@ function shortPubkey(pk: string): string {
   }
   .stat-value--pubkey {
     word-break: break-all;
+  }
+  .copy-icon {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem;
+    margin-left: 0.25rem;
+    background: transparent;
+    border: none;
+    color: var(--muted-2);
+    cursor: pointer;
+    vertical-align: -3px;
+    transition: color 0.15s;
+  }
+  .copy-icon:hover,
+  .copy-icon:focus-visible {
     color: var(--accent);
+  }
+  .copy-icon .material-symbols-outlined {
+    font-size: 14px;
   }
   .stat-value--counter {
     font-size: var(--fs-headline-md);
@@ -152,3 +180,23 @@ function shortPubkey(pk: string): string {
     }
   }
 </style>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-copy-pubkey]").forEach((btn) => {
+    const icon = btn.querySelector<HTMLElement>(".material-symbols-outlined");
+    btn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copyPubkey ?? "");
+        if (icon) {
+          const original = icon.textContent ?? "content_copy";
+          icon.textContent = "check";
+          window.setTimeout(() => {
+            icon.textContent = original;
+          }, 1200);
+        }
+      } catch {
+        window.prompt("Club pubkey:", btn.dataset.copyPubkey);
+      }
+    });
+  });
+</script>
