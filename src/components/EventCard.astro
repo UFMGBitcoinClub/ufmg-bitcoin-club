@@ -2,18 +2,22 @@
 export interface Props {
   event: {
     id: string;
+    kind: number;
+    d: string;
     title: string;
     startMs: number;
     endMs: number | null;
     location: string | null;
+    image: string | null;
     description: string;
     tags: string[];
     dateOnly: boolean;
   };
   status: "upcoming" | "past";
+  rsvp?: { going: number; tentative: number; declined: number };
 }
 
-const { event, status } = Astro.props;
+const { event, status, rsvp } = Astro.props;
 const isPast = status === "past";
 
 const dateLabel = new Intl.DateTimeFormat("en-GB", {
@@ -37,53 +41,121 @@ function shortId(id: string): string {
 // External link — opens the raw calendar event on a public Nostr
 // viewer, which lets the visitor's own client take over.
 const nostrLink = `https://njump.me/${event.id}`;
+
+const goingCount = rsvp?.going ?? 0;
+const tentativeCount = rsvp?.tentative ?? 0;
+const showRsvpCount = goingCount > 0 || tentativeCount > 0;
+
+// NIP-52 replaceable address of the calendar event — used by the RSVP
+// script as the `d`/`a` reference and the localStorage cache key.
+const eventAddress = `${event.kind}:${event.d}`;
 ---
 
 <article
-  class={`event-card panel--accent-left ${isPast ? "event-card--past" : ""}`}
+  class={`event-card ${isPast ? "event-card--past" : ""} ${event.image ? "event-card--media" : ""}`}
   data-tags={event.tags.map((t) => t.toLowerCase()).join(" ")}
 >
-  <div class="event-head">
-    <div class="event-head-left">
-      <div class="event-head-tags">
-        
-      </div>
-      <h3 class="event-title">{event.title}</h3>
-      {event.tags.length > 0 && (
-        <div class="event-tags">
-          {event.tags.map((t) => <span class="event-tag">#{t}</span>)}
+  {event.image && (
+    <div class="event-media">
+      <img
+        src={event.image}
+        alt={`Banner for ${event.title}`}
+        loading="lazy"
+      />
+    </div>
+  )}
+
+  <div class="event-body">
+    <div class="event-head">
+      <div class="event-head-left">
+        <div class="event-head-tags">
+          <span class={`badge ${isPast ? "badge--archived" : "badge--active"}`}>
+            {isPast ? "[ PAST ]" : "[ UPCOMING ]"}
+          </span>
+          {showRsvpCount && (
+            <span class="rsvp-chip" title="NIP-52 RSVPs referencing this event">
+              <span class="material-symbols-outlined" aria-hidden="true">how_to_reg</span>
+              {goingCount} going{tentativeCount > 0 ? ` · ${tentativeCount} maybe` : ""}
+            </span>
+          )}
         </div>
-      )}
-    </div>
-    <div class="event-when">
-      <p class="event-date">
-        <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
-        {dateLabel}{timeLabel ? `, ${timeLabel}` : ""}
-      </p>
-      {event.location && (
-        <p class="event-location">
-          <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
-          {event.location}
+        <h3 class="event-title">{event.title}</h3>
+        {event.tags.length > 0 && (
+          <div class="event-tags">
+            {event.tags.map((t) => <span class="event-tag">#{t}</span>)}
+          </div>
+        )}
+      </div>
+      <div class="event-when">
+        <p class="event-date">
+          <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
+          {dateLabel}{timeLabel ? `, ${timeLabel}` : ""}
         </p>
-      )}
+        {event.location && (
+          <p class="event-location">
+            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+            {event.location}
+          </p>
+        )}
+      </div>
     </div>
-  </div>
 
-  <p class="event-description">{event.description}</p>
+    <p class="event-description">{event.description}</p>
 
-  <div class="event-meta-row">
-    <span class="event-id" title={event.id}>EVENT ID: {shortId(event.id)}</span>
-    <a class="view-external" href={nostrLink} target="_blank" rel="noopener noreferrer">
-      <span class="view-external-text">[ VIEW ]</span>
-      <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
-    </a>
+    {!isPast && (
+      <div
+        class="rsvp-row"
+        data-rsvp
+        data-event-id={event.id}
+        data-event-kind={event.kind}
+        data-event-address={eventAddress}
+        data-event-title={event.title}
+      >
+        <div class="rsvp-buttons">
+          <button
+            class="rsvp-btn"
+            type="button"
+            data-rsvp-status="accepted"
+            disabled
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">check</span>
+            Going
+          </button>
+          <button
+            class="rsvp-btn"
+            type="button"
+            data-rsvp-status="tentative"
+            disabled
+          >
+            <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+            Maybe
+          </button>
+        </div>
+        <p class="rsvp-hint" data-rsvp-hint hidden>
+          RSVP needs a Nostr browser extension (NIP-07) — try
+          <a href="https://getalby.com" target="_blank" rel="noopener noreferrer">Alby</a> or
+          <a href="https://github.com/nostrably/nos2x" target="_blank" rel="noopener noreferrer">nos2x</a>,
+          or <a href={nostrLink} target="_blank" rel="noopener noreferrer">RSVP from your own client ↗</a>.
+        </p>
+      </div>
+    )}
+
+    <div class="event-meta-row">
+      <span class="event-id" title={event.id}>EVENT ID: {shortId(event.id)}</span>
+      <a class="view-external" href={nostrLink} target="_blank" rel="noopener noreferrer">
+        <span class="view-external-text">[ VIEW ]</span>
+        <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+      </a>
+    </div>
   </div>
 </article>
 
 <style>
   .event-card {
     position: relative;
-    padding: 1.25rem 1.375rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    border: 1px solid var(--border-soft);
     border-radius: 12px;
     background: var(--accent-soft-bg);
     box-shadow:
@@ -93,6 +165,7 @@ const nostrLink = `https://njump.me/${event.id}`;
       transform 0.18s ease,
       box-shadow 0.18s ease,
       border-color 0.18s ease;
+    overflow: hidden;
   }
   .event-card:hover {
     transform: translateY(-2px);
@@ -103,6 +176,28 @@ const nostrLink = `https://njump.me/${event.id}`;
   }
   .event-card--past {
     background: var(--badge-archived-bg);
+  }
+  /* Banner media: top on mobile, square right column on desktop. */
+  .event-media {
+    position: relative;
+    min-height: 0;
+    aspect-ratio: 16 / 5;
+    background: var(--bg-alt);
+  }
+  .event-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .event-body {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem 1.375rem;
+    min-width: 0;
   }
   .event-head {
     display: flex;
@@ -118,8 +213,31 @@ const nostrLink = `https://njump.me/${event.id}`;
     align-items: flex-start;
     min-width: 0;
   }
+  .event-head-tags {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
   .event-head-tags .badge {
     border-radius: 999px;
+  }
+  .rsvp-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--accent-dim);
+    background: var(--bg-raised);
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    padding: 0.2rem 0.6rem;
+    white-space: nowrap;
+  }
+  .rsvp-chip .material-symbols-outlined {
+    font-size: 0.85rem;
   }
   .event-title {
     text-transform: uppercase;
@@ -176,6 +294,68 @@ const nostrLink = `https://njump.me/${event.id}`;
     line-height: 1.55;
     color: var(--muted);
   }
+
+  .rsvp-row {
+    margin-bottom: 1rem;
+  }
+  .rsvp-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .rsvp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--fg);
+    background: var(--bg-raised);
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    padding: 0.4rem 0.85rem;
+    cursor: pointer;
+    transition:
+      color 0.15s,
+      border-color 0.15s,
+      background-color 0.15s,
+      opacity 0.15s;
+  }
+  .rsvp-btn .material-symbols-outlined {
+    font-size: 0.95rem;
+  }
+  .rsvp-btn:hover:not(:disabled):not(.rsvp-btn--active) {
+    color: var(--accent-dim);
+    border-color: var(--accent);
+    background: var(--accent-soft-bg);
+  }
+  .rsvp-btn.rsvp-btn--active {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent-dim);
+    cursor: default;
+  }
+  .rsvp-btn:disabled:not(.rsvp-btn--active) {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .rsvp-hint {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .rsvp-hint a {
+    color: var(--accent-dim);
+    text-decoration: none;
+  }
+  .rsvp-hint a:hover {
+    text-decoration: underline;
+  }
+
   .event-meta-row {
     display: flex;
     justify-content: space-between;
@@ -220,7 +400,21 @@ const nostrLink = `https://njump.me/${event.id}`;
     border-color: var(--accent);
     background: var(--accent-soft-bg);
   }
+
   @media (min-width: 769px) {
+    .event-card--media {
+      /* 3:1 text-to-image split — square banner fills the right column. */
+      grid-template-columns: 3fr 1fr;
+      grid-template-areas: "body media";
+    }
+    .event-card--media .event-body {
+      grid-area: body;
+    }
+    .event-card--media .event-media {
+      grid-area: media;
+      aspect-ratio: 1 / 1;
+      height: 100%;
+    }
     .event-head {
       flex-direction: row;
       align-items: flex-start;
@@ -228,6 +422,29 @@ const nostrLink = `https://njump.me/${event.id}`;
     .event-when {
       text-align: right;
       flex-shrink: 0;
+    }
+  }
+  @media (max-width: 480px) {
+    .event-media {
+      aspect-ratio: 16 / 5;
+    }
+    .event-body {
+      padding: 0.9rem 1rem;
+    }
+    .event-title {
+      font-size: 0.95rem;
+    }
+    .event-meta-row {
+      gap: 0.75rem;
+      font-size: 0.65rem;
+    }
+    .view-external {
+      padding: 0.25rem 0.55rem;
+      font-size: 0.62rem;
+    }
+    .rsvp-btn {
+      padding: 0.35rem 0.7rem;
+      font-size: 0.65rem;
     }
   }
 </style>

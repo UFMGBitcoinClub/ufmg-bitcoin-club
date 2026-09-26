@@ -2,6 +2,9 @@
 import Layout from "../components/Layout.astro";
 import EventCard from "../components/EventCard.astro";
 import calendar from "../data/calendar.json";
+import rsvpsData from "../data/rsvps.json";
+import { RELAYS } from "../../scripts/lib/relays.mjs";
+import { CLUB_PUBKEY } from "../config/club.mjs";
 
 const allEvents = [...calendar.upcoming, ...calendar.past];
 const hasEvents = allEvents.length > 0;
@@ -18,6 +21,16 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
     (ev.tags ?? []).some((t) => t.toLowerCase().startsWith(stem))
   ).length,
 }));
+
+// RSVP counts from rsvps.json, keyed by calendar event id (the aggregator
+// also keys by NIP-52 address, but id lookups cover both `e` and `a` refs).
+const byEvent = (rsvpsData.byEvent ?? {}) as Record<
+  string,
+  { going: number; tentative: number; declined: number }
+>;
+function rsvpFor(event: { id: string }) {
+  return byEvent[event.id];
+}
 ---
 
 <Layout title="Events" active="events">
@@ -44,12 +57,17 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
       <p style="color: var(--accent)"class="page-kicker">:: SYS.DIR.QUERY( EVENTS )</p>
 
       <div class="events-wrap">
-        <div class="events-list" data-events-grid>
+        <div
+          class="events-list"
+          data-events-grid
+          data-club-pubkey={CLUB_PUBKEY}
+          data-relays={JSON.stringify(RELAYS)}
+        >
           {calendar.upcoming.length > 0 && (
             <section class="events-group" data-group="upcoming">
               <h2 class="events-group-label events-group-label--upcoming">[ Upcoming ]</h2>
               {calendar.upcoming.map((event) => (
-                <EventCard event={event} status="upcoming" />
+                <EventCard event={event} status="upcoming" rsvp={rsvpFor(event)} />
               ))}
             </section>
           )}
@@ -57,7 +75,7 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
             <section class="events-group" data-group="past">
               <h2 class="events-group-label events-group-label--past">[ Past ]</h2>
               {calendar.past.map((event) => (
-                <EventCard event={event} status="past" />
+                <EventCard event={event} status="past" rsvp={rsvpFor(event)} />
               ))}
             </section>
           )}
@@ -92,6 +110,17 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .events-panel {
       background: var(--bg-soft-fallback);
+    }
+  }
+  @media (max-width: 480px) {
+    .events-panel {
+      padding: 0.9rem 0.9rem 1.1rem;
+    }
+    .filter-bar {
+      gap: 0.9rem;
+    }
+    .events-list {
+      max-height: 520px;
     }
   }
   .page-lead {
@@ -251,4 +280,104 @@ const categoryCounts = EVENT_CATEGORIES.map(({ key, stem }) => ({
       if (emptyMessage) emptyMessage.hidden = visible > 0;
     });
   });
+</script>
+
+<script>
+  // NIP-52 event RSVPs, signed client-side via NIP-07 (window.nostr) —
+  // the site stays keyless (architecture.md §2): members sign with their
+  // own extension and the signed event is published to the club relays.
+  import { SimplePool } from "nostr-tools";
+
+  const grid = document.querySelector<HTMLElement>("[data-events-grid]");
+  if (grid) {
+    const CLUB_PUBKEY = grid.dataset.clubPubkey ?? "";
+    const RELAYS: string[] = JSON.parse(grid.dataset.relays ?? "[]");
+    const nostr = (window as unknown as { nostr?: NIP07 }).nostr;
+    const pool = new SimplePool();
+
+    interface NIP07 {
+      getPublicKey(): Promise<string>;
+      signEvent(event: {
+        kind: number;
+        created_at: number;
+        tags: string[][];
+        content: string;
+      }): Promise<{ id: string; pubkey: string; sig: string; [k: string]: unknown }>;
+    }
+
+    const rsvpRows = Array.from(grid.querySelectorAll<HTMLElement>("[data-rsvp]"));
+
+    const cacheKey = (address: string) => `rsvp:${address}`;
+
+    const activate = (row: HTMLElement, status: string) => {
+      row.querySelectorAll<HTMLButtonElement>(".rsvp-btn").forEach((b) => {
+        b.classList.toggle("rsvp-btn--active", b.dataset.rsvpStatus === status);
+      });
+    };
+
+    const enableForNIP07 = () => {
+      rsvpRows.forEach((row) => {
+        if (nostr) {
+          row.querySelectorAll<HTMLButtonElement>(".rsvp-btn").forEach((b) => {
+            b.disabled = false;
+          });
+        } else {
+          row.querySelectorAll<HTMLButtonElement>(".rsvp-btn").forEach((b) => {
+            b.disabled = true;
+            b.title = "Install a Nostr browser extension (NIP-07) to RSVP";
+          });
+          row.querySelector<HTMLElement>("[data-rsvp-hint]")?.removeAttribute("hidden");
+        }
+        const saved = localStorage.getItem(cacheKey(row.dataset.eventAddress ?? ""));
+        if (saved) activate(row, saved);
+      });
+    };
+
+    const publishRsvp = async (row: HTMLElement, status: string) => {
+      if (!nostr) return;
+      const calKind = Number(row.dataset.eventKind);
+      const address = row.dataset.eventAddress ?? "";
+      const eventId = row.dataset.eventId ?? "";
+
+      const event = {
+        // 31922 calendar events pair with 31924 RSVPs, 31923 with 31925.
+        kind: calKind === 31922 ? 31924 : 31925,
+        created_at: Math.floor(Date.now() / 1000),
+        tags: [
+          ["d", address],
+          ["a", address],
+          ["e", eventId],
+          ["status", status],
+        ],
+        content: "",
+      };
+
+      const buttons = row.querySelectorAll<HTMLButtonElement>(".rsvp-btn");
+      buttons.forEach((b) => (b.disabled = true));
+      try {
+        const signed = await nostr.signEvent(event);
+        // Resolves once any relay accepts the signed event.
+        await Promise.any(pool.publish(RELAYS, signed));
+        activate(row, status);
+        localStorage.setItem(cacheKey(address), status);
+      } catch {
+        row.querySelector<HTMLElement>("[data-rsvp-hint]")?.removeAttribute("hidden");
+      } finally {
+        buttons.forEach((b) => {
+          if (!b.classList.contains("rsvp-btn--active")) b.disabled = !nostr;
+        });
+      }
+    };
+
+    rsvpRows.forEach((row) => {
+      row.querySelectorAll<HTMLButtonElement>(".rsvp-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          if (btn.classList.contains("rsvp-btn--active")) return;
+          publishRsvp(row, btn.dataset.rsvpStatus ?? "accepted");
+        });
+      });
+    });
+
+    enableForNIP07();
+  }
 </script>
