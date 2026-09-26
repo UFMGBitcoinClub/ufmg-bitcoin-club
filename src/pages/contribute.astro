@@ -201,10 +201,18 @@ const communityLinks = [
       grid-template-columns: 1fr;
       gap: 1.5rem;
     }
-    /* Single column: the panel is auto-height, so restore content-based
-       sizing (capped) instead of flex-fill. */
-    .links-viewport {
-      flex: 0 1 auto;
+    /* Phones: keep the page lean — hero text + Lightning only. */
+    .community-links {
+      display: none;
+    }
+    .help-section {
+      display: none;
+    }
+  }
+  @media (max-width: 480px) {
+    .contribute-hero {
+      gap: 1.25rem;
+      padding-left: 1rem;
     }
   }
   .contribute-grid {

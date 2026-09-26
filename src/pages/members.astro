@@ -59,7 +59,7 @@ function badgesFor(pubkey: string): { id: string; name: string }[] {
     <section class="honors panel--accent-left">
       <h2 class="section-title small">Honors</h2>
       <p class="honors-note">
-        Club-signed NIP-58 badge awards (kinds 30008/30009) — independently
+        Club-signed NIP-58 badge awards (definitions kind 30009, awards kind 8) — independently
         verifiable on any Nostr client, not just this site.
       </p>
       <div class="honor-list">
@@ -96,6 +96,11 @@ function badgesFor(pubkey: string): { id: string; name: string }[] {
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .members-section {
       background: var(--bg-soft-fallback);
+    }
+  }
+  @media (max-width: 480px) {
+    .members-section {
+      padding: 0.9rem 0.9rem 1.1rem;
     }
   }
   .page-lead {

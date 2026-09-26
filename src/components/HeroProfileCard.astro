@@ -92,6 +92,7 @@ function shortPubkey(pk: string): string {
   }
   .hero-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.75rem;
   }
   .hero-art {
@@ -169,6 +170,12 @@ function shortPubkey(pk: string): string {
   @media (max-width: 768px) {
     .hero {
       grid-template-columns: 1fr;
+    }
+    .hero-art {
+      padding: 0.5rem 0 0 0;
+    }
+    .hero-logo {
+      max-width: 200px;
     }
     .stat-bar {
       grid-template-columns: repeat(2, 1fr);

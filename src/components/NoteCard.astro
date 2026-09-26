@@ -118,7 +118,7 @@ const njumpUrl = `https://njump.me/${displayId}`;
     flex-direction: column;
     padding: 1rem 1.25rem;
     border: 1px solid var(--border-soft);
-    border-radius: 12px;
+    border-radius: 3px;
     background: var(--accent-soft-bg);
     box-shadow:
       0 10px 24px -14px rgba(23, 19, 13, 0.28),
@@ -279,5 +279,35 @@ const njumpUrl = `https://njump.me/${displayId}`;
   }
   .note-footer a:hover {
     color: var(--accent-dim);
+  }
+  @media (max-width: 480px) {
+    .note-card {
+      padding: 0.85rem 1rem;
+    }
+    .note-avatar {
+      width: 1.75rem;
+      height: 1.75rem;
+      font-size: 0.6rem;
+    }
+    .note-name {
+      font-size: 0.78rem;
+    }
+    .note-sub {
+      font-size: 0.58rem;
+    }
+    .note-meta {
+      margin-bottom: 0.5rem;
+    }
+    .note-meta-right {
+      gap: 0.4rem;
+      font-size: 0.65rem;
+    }
+    .view-external {
+      width: 1.6rem;
+      height: 1.6rem;
+    }
+    .view-external .material-symbols-outlined {
+      font-size: 0.8rem;
+    }
   }
 </style>

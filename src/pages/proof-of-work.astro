@@ -68,6 +68,14 @@ const typeCounts = PROJECT_TYPES.map((key) => ({
       background: var(--bg-soft-fallback);
     }
   }
+  @media (max-width: 480px) {
+    .projects-section {
+      padding: 0.9rem 0.9rem 1.1rem;
+    }
+    .filter-bar {
+      gap: 0.9rem;
+    }
+  }
   .page-lead {
     color: var(--muted);
     max-width: 62ch;
