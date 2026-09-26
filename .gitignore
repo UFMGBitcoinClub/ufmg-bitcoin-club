@@ -30,3 +30,7 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+#opencode
+.opencode
+
