@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // NIP-58 badges (read side): fetches the club's badge definitions
-// (kind 30008) and club-signed badge awards (kind 30009) at build time.
+// (kind 30009) and club-signed badge awards (kind 8) at build time.
 //
 // The club manager publishes definitions and awards with their own
 // signing setup outside this repository — this site only ever READS
@@ -51,12 +51,12 @@ async function main() {
 
   const pool = createPool();
   const [definitionEvents, awardEvents] = await Promise.all([
-    queryRelays(pool, RELAYS, { authors: [CLUB_PUBKEY], kinds: [30008], limit: DEFINITIONS_LIMIT }),
-    queryRelays(pool, RELAYS, { authors: [CLUB_PUBKEY], kinds: [30009], limit: AWARDS_LIMIT }),
+    queryRelays(pool, RELAYS, { authors: [CLUB_PUBKEY], kinds: [30009], limit: DEFINITIONS_LIMIT }),
+    queryRelays(pool, RELAYS, { authors: [CLUB_PUBKEY], kinds: [8], limit: AWARDS_LIMIT }),
   ]);
   pool.close(RELAYS);
 
-  // Badge definitions (kind 30008) are parameterized replaceable events:
+  // Badge definitions (kind 30009) are parameterized replaceable events:
   // keep only the newest per `d` tag.
   const defsByD = new Map();
   for (const evt of definitionEvents) {
@@ -69,19 +69,23 @@ async function main() {
   const definitions = [...defsByD.values()].map((evt) => ({
     id: tagValue(evt.tags, "d"),
     name: tagValue(evt.tags, "name") || tagValue(evt.tags, "d"),
-    description: evt.content ?? null,
+    // NIP-58 puts the description in a tag; content is not standardized.
+    description: tagValue(evt.tags, "description") ?? evt.content ?? null,
     image: tagValue(evt.tags, "image"),
     thumb: tagValues(evt.tags, "thumb")[0] ?? null,
   }));
 
-  // Badge awards (kind 30009): `a` tag points at the definition
-  // ("30008:<pubkey>:<d>"), `p` tags list the awarded pubkeys. One award
-  // event may grant the badge to many members at once.
+  // Badge awards (kind 8, immutable): the `a` tag points at the
+  // definition ("30009:<issuer-pubkey>:<d>"), `p` tags list the awarded
+  // pubkeys. One award event may grant the badge to many members at once.
+  // Only awards referencing the club's own kind-30009 definitions count.
   const seenAwards = new Set();
   const awards = [];
+  const clubPrefix = `30009:${CLUB_PUBKEY.toLowerCase()}:`;
   for (const evt of awardEvents) {
     const a = tagValue(evt.tags, "a");
     if (!a) continue;
+    if (!a.toLowerCase().startsWith(clubPrefix)) continue;
     const parts = a.split(":");
     const badgeId = parts[2] ?? null;
     if (!badgeId) continue;

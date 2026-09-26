@@ -78,13 +78,19 @@ async function main() {
     return;
   }
 
-  // Parameterized replaceable semantics: dedupe by `d`, keep newest per d.
+  // Merge with previously committed metadata: union by `d` (newest fresh
+  // event wins; committed entries only carried over when the fresh fetch did
+  // not return that `d` at all). This makes partial relay failures
+  // non-destructive instead of all-or-nothing.
   const byD = new Map();
   for (const evt of events) {
     const d = tagValue(evt.tags, "d");
     if (!d) continue;
     const existingEvt = byD.get(d);
     if (!existingEvt || evt.created_at > existingEvt.created_at) byD.set(d, evt);
+  }
+  for (const prev of existing?.projects ?? []) {
+    if (prev?.d && !byD.has(prev.d)) byD.set(prev.d, prev);
   }
 
   const projects = [...byD.values()].map(normalizeEvent).filter(Boolean);

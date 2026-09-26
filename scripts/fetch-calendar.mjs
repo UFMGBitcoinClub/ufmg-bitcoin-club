@@ -34,7 +34,7 @@ function normalizeEvent(evt) {
   const startRaw = tagValue(evt.tags, "start");
   const endRaw = tagValue(evt.tags, "end");
   const location = tagValue(evt.tags, "location");
-  const topics = tagValues(evt.tags, "t");
+  const image = tagValue(evt.tags, "image");  const topics = tagValues(evt.tags, "t");
 
   if (!d || !title || !startRaw) return null;
 
@@ -54,6 +54,8 @@ function normalizeEvent(evt) {
     startMs,
     endMs,
     location: location ?? null,
+    // NIP-52 `image` tag (banner art) — rendered by EventCard.
+    image: image ?? null,
     description: evt.content ?? "",
     tags: topics,
     dateOnly,
