@@ -21,8 +21,12 @@ GitHub Actions (scheduled + manual dispatch)
 
 
 No private key, signing call, or write-capable relay operation exists
-anywhere in this codebase. Every fetch script performs read-only `REQ`
-queries only.
+anywhere in this codebase — with one deliberate exception: the Events
+page lets visitors publish NIP-52 RSVP events (kinds 31924/31925). Those
+events are signed by the visitor's own NIP-07 browser extension
+(`window.nostr.signEvent`) — the site never holds, sees, or transmits a
+private key, it only relays member-signed events. Every fetch script
+performs read-only `REQ` queries only.
 
 ## 3. Tech Stack
 
@@ -66,8 +70,9 @@ design tokens and shared utility classes (`.btn`, `.panel`, `.badge`,
 | `31922`, `31923` | NIP-52 calendar events | `fetch-calendar.mjs` | `calendar.json` |
 | `32268` | Proof of Work project record (custom — see §7) | `fetch-projects.mjs` | `projects.json` |
 | probe (REQ) + NIP-11 | Per-relay health: connect latency, club-event counts per kind, relay info document | `fetch-relays.mjs` | `relays.json` |
-| `30008`, `30009` (NIP-58) | Badge definitions + club-signed badge awards | `fetch-badges.mjs` | `badges.json` |
+| `30009` (definition), `8` (award) — NIP-58 | Badge definitions + club-signed badge awards | `fetch-badges.mjs` | `badges.json` |
 | `31924`, `31925`, check-in `1`s | Member engagement evidence (RSVPs / check-in notes referencing club calendar events — self-attested tier) | `fetch-members.mjs` | `members.json` (`attendance`, `joinedAt`) |
+| `31924`, `31925` (all authors) | Per-event RSVP aggregates ("N going · M maybe") across every Nostr user, not just members | `fetch-rsvps.mjs` | `rsvps.json` |
 
 All fetch scripts share `scripts/lib/relays.mjs` (single relay list) and
 `scripts/lib/pool.mjs` (read-only SimplePool wrapper). All are non-fatal:
@@ -128,7 +133,9 @@ source code.
 │ ├── fetch-profile.mjs
 │ ├── fetch-notes.mjs
 │ ├── fetch-calendar.mjs
+│ ├── fetch-rsvps.mjs
 │ ├── fetch-members.mjs
+│ ├── fetch-badges.mjs
 │ ├── fetch-projects.mjs
 │ ├── fetch-relays.mjs
 │ └── generate-qr.mjs
@@ -142,6 +149,7 @@ source code.
 │ │ └── contribute.mjs
 │ ├── data/
 │ │ ├── profile.json / feed.json / calendar.json / members.json
+│ │ ├── rsvps.json / badges.json
 │ │ ├── projects.json / lightning-qr.json / relays.json
 │ ├── components/
 │ │ ├── Header.astro / Footer.astro / Layout.astro
@@ -161,7 +169,7 @@ source code.
 
 Single GitHub Actions workflow, triggered on push to `main`, every 4
 hours by cron, and manually via `workflow_dispatch`: install deps → run
-`npm run fetch:all` (all 6 generators) → `astro build` → deploy to
+`npm run fetch:all` (all generators) → `astro build` → deploy to
 GitHub Pages. No server, no database, no paid infrastructure.
 
 ## 10. Known Manual Steps / Limitations

@@ -42,15 +42,16 @@ kind:0 Nostr metadata at build time, deployed to GitHub Pages.
 
 ```bash
 npm install
-npm run fetch:all   # runs all 4 generators: profile, notes/feed, calendar, members, QR
+npm run fetch:all   # runs all generators: profile, notes/feed, calendar, RSVPs, members, badges, projects, relays, QR
 npm run dev          # http://localhost:4321
 npm run build        # fetch:all + static build into dist/
 npm run preview      # serve the built dist/ locally
 ```
 
 Individual generators can also be run on their own: `npm run fetch:profile`,
-`npm run fetch:notes`, `npm run fetch:calendar`, `npm run fetch:members`,
-`npm run fetch:badges`, `npm run validate:members`, `npm run generate:qr`.
+`npm run fetch:notes`, `npm run fetch:calendar`, `npm run fetch:rsvps`,
+`npm run fetch:members`, `npm run fetch:badges`, `npm run validate:members`,
+`npm run generate:qr`.
 
 ## Membership & badges
 
@@ -59,10 +60,11 @@ Individual generators can also be run on their own: `npm run fetch:profile`,
   `.github/pull_request_template.md`); CI validates the registry
   (format + duplicates) and a maintainer merges.
 - Badges (founder, challenge completions, meetup series) are **NIP-58**
-  badge awards (kinds 30008/30009) signed by the club key outside this
-  repository, fetched at build time by `scripts/fetch-badges.mjs` and shown
-  on the Members page. Attendance evidence (NIP-52 RSVPs and check-in notes)
-  is aggregated by `scripts/fetch-members.mjs`.
+  badge awards (definitions kind 30009, awards kind 8) signed by the club
+  key outside this repository, fetched at build time by
+  `scripts/fetch-badges.mjs` and shown on the Members page. Attendance
+  evidence (NIP-52 RSVPs and check-in notes) is aggregated by
+  `scripts/fetch-members.mjs`.
 
 ## Enabling GitHub Pages deployment
 
