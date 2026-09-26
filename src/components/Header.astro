@@ -9,7 +9,7 @@ export interface Props {
 const { active } = Astro.props;
 ---
 
-<header class="site-header">
+<header class="site-header" data-header>
   <div class="site-header-inner">
     <a class="logo" href={withBase("/")}>
       <img
@@ -19,9 +19,19 @@ const { active } = Astro.props;
         width="56"
         height="56"
       />
-      <p>UFMG <span class="logo-name">Bitcoin</span> Club</p> 
+      <p>UFMG <span class="logo-name">Bitcoin</span> Club</p>
     </a>
-    <nav class="nav-list">
+    <button
+      class="menu-toggle"
+      type="button"
+      data-menu-toggle
+      aria-expanded="false"
+      aria-controls="site-nav"
+      aria-label="Toggle navigation menu"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true" data-menu-icon>menu</span>
+    </button>
+    <nav class="nav-list" id="site-nav" data-nav-list>
       {
         NAV_ITEMS.map((item) => (
           <a
@@ -35,3 +45,38 @@ const { active } = Astro.props;
     </nav>
   </div>
 </header>
+
+<script>
+  const header = document.querySelector<HTMLElement>("[data-header]");
+  const toggle = header?.querySelector<HTMLButtonElement>("[data-menu-toggle]");
+  const icon = header?.querySelector<HTMLElement>("[data-menu-icon]");
+
+  const setOpen = (open: boolean) => {
+    if (!header || !toggle || !icon) return;
+    if (open) {
+      header.setAttribute("data-open", "");
+    } else {
+      header.removeAttribute("data-open");
+    }
+    toggle.setAttribute("aria-expanded", String(open));
+    icon.textContent = open ? "close" : "menu";
+  };
+
+  toggle?.addEventListener("click", () => {
+    setOpen(!header?.hasAttribute("data-open"));
+  });
+
+  header?.querySelectorAll(".nav-link").forEach((link) => {
+    link.addEventListener("click", () => setOpen(false));
+  });
+
+  document.addEventListener("click", (e) => {
+    if (header?.hasAttribute("data-open") && !header.contains(e.target as Node)) {
+      setOpen(false);
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 768) setOpen(false);
+  });
+</script>

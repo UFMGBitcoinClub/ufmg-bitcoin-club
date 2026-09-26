@@ -1,0 +1,81 @@
+---
+import Layout from "../components/Layout.astro";
+import { withBase } from "../lib/url.js";
+---
+
+<Layout title="Manifesto" active="manifesto">
+  <section class="page-hero panel--accent-left">
+    <h1 class="page-title">Manifesto</h1>
+    <p class="page-lead">
+      Why we exist, what we stand for, and the standard of proof we hold
+      ourselves to.
+    </p>
+  </section>
+
+  <section class="manifesto-body">
+    <p class="manifesto-draft-note mono-label">// DRAFT — PENDING RATIFICATION</p>
+    <div class="manifesto-placeholder corner-accent">
+      <h2 class="section-title small">[ Under Construction ]</h2>
+      <p>
+        The club manifesto is being written and ratified by our members. Once
+        published, it will live as a long-form Nostr note (NIP-23) — signed by
+        the club, verifiable on any relay, and rendered here directly from the
+        protocol.
+      </p>
+      <p>
+        Until then, the short version: <strong>study the protocol, run the
+        nodes, verify everything, trust the math.</strong> We are a student
+        collective at UFMG dedicated to Bitcoin research, development, and
+        proliferation — sovereign individuals organized around proof of work,
+        in code and in thought.
+      </p>
+      <div class="manifesto-actions">
+        <a class="btn btn--dark" href={withBase("/join")}>Join the club</a>
+        <a class="btn btn--outline" href="https://github.com/UFMGBitcoinClub" target="_blank" rel="noopener noreferrer">
+          Follow the work
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .manifesto-body {
+    margin-bottom: 3rem;
+  }
+  .page-lead {
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .manifesto-draft-note {
+    margin: 0 0 0.75rem 0;
+  }
+  .manifesto-placeholder {
+    padding: 2rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    background: var(--accent-soft-bg);
+    box-shadow:
+      0 10px 24px -14px rgba(23, 19, 13, 0.28),
+      0 2px 6px -2px rgba(23, 19, 13, 0.12);
+  }
+  .manifesto-placeholder p {
+    color: var(--muted);
+    max-width: 60ch;
+  }
+  .manifesto-placeholder strong {
+    color: var(--fg);
+  }
+  .manifesto-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  @media (max-width: 480px) {
+    .manifesto-placeholder {
+      padding: 1.1rem 1rem;
+    }
+  }
+</style>
