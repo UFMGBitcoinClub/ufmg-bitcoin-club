@@ -1,5 +1,20 @@
 {
-  "definitions": [],
-  "awards": [],
-  "fetchedAt": "2026-09-24T14:46:07.101Z"
+  "definitions": [
+    {
+      "id": "founder",
+      "name": "Co-founder",
+      "description": "",
+      "image": null,
+      "thumb": null
+    }
+  ],
+  "awards": [
+    {
+      "badgeId": "founder",
+      "pubkey": "6a8cc5cf25ff56e3652bca7a4947119f3cc162e693a31b63d9afc6d859691925",
+      "awardedAt": 1790282596,
+      "eventId": "96c0de316ba33a2a2cd9ba8b8c1967efb72ca5ac9dad5faa686c1b871d0eb20b"
+    }
+  ],
+  "fetchedAt": "2008-09-10T03:57:02.184Z"
 }

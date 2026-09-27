@@ -1,5 +1,186 @@
 {
-  "upcoming": [],
-  "past": [],
-  "fetchedAt": null
+  "upcoming": [
+    {
+      "id": "653cf13ee7505b5df4ab71c639229132e823f55c9756ac6915f699e80bc29c86",
+      "kind": 31923,
+      "d": "29-bh-bitdevs",
+      "title": "29˚ BH Bitdevs",
+      "startMs": 1790805600000,
+      "endMs": 1790816400000,
+      "location": "UFMG, Escola de Engenharia - sala 1030",
+      "image": "https://secure.meetupstatic.com/photos/event/b/a/9/f/clean_517247775.webp",
+      "description": "BitDevs é uma comunidade para aqueles interessados em discutir e participar na pesquisa e desenvolvimento do Bitcoin e de protocolos relacionados. Apesar de as discussões serem técnicas, são abertas a interessados de todos os níveis. Vem aprender com a gente! https://www.meetup.com/belo-horizonte-bitdevs/events/316415910/?eventOrigin=group_upcoming_events",
+      "tags": [
+        "bitdevs"
+      ],
+      "dateOnly": false
+    }
+  ],
+  "past": [
+    {
+      "id": "163e9a4ddae9970b1ff8c51c2f3bf105296f1e4775ca5c12a9c767129716c83d",
+      "kind": 31923,
+      "d": "bit-cine-cypherpunks",
+      "title": "Cypherpunks Write Code",
+      "startMs": 1790373600000,
+      "endMs": null,
+      "location": "Auditório principal da Escola de Engenharia",
+      "image": "https://secure.meetupstatic.com/photos/event/4/2/5/7/highres_536296983.webp?w=1080",
+      "description": "Exibição do documentário Cypherpunks Write Code, que apresenta a história do movimento cypherpunk e sua relação com o desenvolvimento da criptografia, da privacidade digital e do Bitcoin.",
+      "tags": [],
+      "dateOnly": false
+    },
+    {
+      "id": "f79c761eb64a507b51d19a7ad2801f9140d36128c829e899d706fc56217a3e94",
+      "kind": 31923,
+      "d": "quantum-computing-seed-backup",
+      "title": "Quantum computing and Seed Phrase distributed backup",
+      "startMs": 1787868000000,
+      "endMs": 1787878800000,
+      "location": "UFMG - Icex / Institute for Exact Science",
+      "image": "https://secure.meetupstatic.com/photos/event/d/3/6/3/highres_535554115.webp?w=1080",
+      "description": "Discussion on how quantum computing could impact Bitcoin seed phrase security and explore distributed backup strategies.",
+      "tags": [
+        "cryptography",
+        "quantum computing",
+        "seed-backup"
+      ],
+      "dateOnly": false
+    },
+    {
+      "id": "fd2d6a01704eb402264f470aad74efd9d76cd88d7b7471e3d067896be7faaa45",
+      "kind": 31923,
+      "d": "27-bh-bitdevs",
+      "title": "27˚ BH Bitdevs",
+      "startMs": 1785362400000,
+      "endMs": 1785373200000,
+      "location": "Escola de Engenharia da UFMG",
+      "image": "https://secure.meetupstatic.com/photos/event/b/a/9/f/clean_517247775.webp",
+      "description": "BitDevs é uma comunidade para aqueles interessados em discutir e participar na pesquisa e desenvolvimento do Bitcoin e protocolos relacionados. Apesar de as discussões serem técnicas, são abertas a interessados de todos os níveis, vem aprender com a gente!",
+      "tags": [
+        "bitdevs",
+        "bitcoin",
+        "bh"
+      ],
+      "dateOnly": false
+    },
+    {
+      "id": "907755ab6949f8252bb8bcb5fb257cd4257a5de8d40f156cff9aaa09dc0f76b3",
+      "kind": 31923,
+      "d": "a302a644",
+      "title": "28º BitDevs BH",
+      "startMs": 1785103200000,
+      "endMs": 1785114000000,
+      "location": "Escola de Engenharia - UFMG, Av. Pres. Antônio Carlos, 6627 - Pampulha, Belo Horizonte - MG, 31270-901, Brazil",
+      "image": "https://secure.meetupstatic.com/photos/event/b/a/9/f/clean_517247775.webp",
+      "description": "BitDevs é uma comunidade para aqueles interessados em discutir e participar na pesquisa e desenvolvimento do Bitcoin e de protocolos relacionados.\n\nApesar de as discussões serem técnicas, são abertas a interessados de todos os níveis. Vem aprender com a gente!\n\nNo meetup discutimos as últimas notícias, Pull Requests, e-mails na mailing list e qualquer outro assunto técnico relacionado a Bitcoin, Lightning Network e outros projetos open source relacionados.",
+      "tags": [
+        "bitdevs"
+      ],
+      "dateOnly": false
+    },
+    {
+      "id": "1f7e56828ba652634b15251940f90f14e1d7ed5c4e0e71fa745fb532e8bb65f7",
+      "kind": 31923,
+      "d": "26-bh-bitdevs",
+      "title": "26˚ BH Bitdevs",
+      "startMs": 1782511200000,
+      "endMs": 1782522000000,
+      "location": "Escola de Engenharia da UFMG",
+      "image": "https://secure.meetupstatic.com/photos/event/b/a/9/f/clean_517247775.webp",
+      "description": "BitDevs é uma comunidade para aqueles interessados em discutir e participar na pesquisa e desenvolvimento do Bitcoin e protocolos relacionados. Apesar de as discussões serem técnicas, são abertas a interessados de todos os níveis, vem aprender com a gente!",
+      "tags": [
+        "bitdevs",
+        "bitcoin",
+        "bh"
+      ],
+      "dateOnly": false
+    },
+    {
+      "id": "75ab85e84cc8dc9731647159f14b95aa682deb0b05c209bd6182190cccb5287e",
+      "kind": 31923,
+      "d": "25-bh-bitdevs",
+      "title": "25˚ BH Bitdevs",
+      "startMs": 1779919200000,
+      "endMs": 1779930000000,
+      "location": "Escola de Engenharia da UFMG",
+      "image": "https://secure.meetupstatic.com/photos/event/b/a/9/f/clean_517247775.webp",
+      "description": "BitDevs é uma comunidade para aqueles interessados em discutir e participar na pesquisa e desenvolvimento do Bitcoin e protocolos relacionados. Apesar de as discussões serem técnicas, são abertas a interessados de todos os níveis, vem aprender com a gente!",
+      "tags": [
+        "bitdevs",
+        "bitcoin",
+        "bh"
+      ],
+      "dateOnly": false
+    },
+    {
+      "id": "8a67c5be4517e666834b638f2785d55048b12e7221bc0c752d05162ac80ead94",
+      "kind": 31923,
+      "d": "24-bh-bitdevs",
+      "title": "24˚ BH Bitdevs",
+      "startMs": 1777500000000,
+      "endMs": 1777510800000,
+      "location": "Escola de Engenharia da UFMG",
+      "image": "https://secure.meetupstatic.com/photos/event/b/a/9/f/clean_517247775.webp",
+      "description": "BitDevs é uma comunidade para aqueles interessados em discutir e participar na pesquisa e desenvolvimento do Bitcoin e protocolos relacionados. Apesar de as discussões serem técnicas, são abertas a interessados de todos os níveis, vem aprender com a gente!",
+      "tags": [
+        "bitdevs",
+        "bitcoin",
+        "bh"
+      ],
+      "dateOnly": false
+    },
+    {
+      "id": "ce7f3a09dcd9c4eaeefa7fa0798e94953de195fb1afabf49c8635622aae4f259",
+      "kind": 31923,
+      "d": "23-bh-bitdevs",
+      "title": "23˚ BH Bitdevs",
+      "startMs": 1774476000000,
+      "endMs": 1774486800000,
+      "location": "Escola de Engenharia da UFMG",
+      "image": "https://secure.meetupstatic.com/photos/event/b/a/9/f/clean_517247775.webp",
+      "description": "BitDevs é uma comunidade para aqueles interessados em discutir e participar na pesquisa e desenvolvimento do Bitcoin e protocolos relacionados. Apesar de as discussões serem técnicas, são abertas a interessados de todos os níveis, vem aprender com a gente!",
+      "tags": [
+        "bitcoin",
+        "bh",
+        "bitdevs"
+      ],
+      "dateOnly": false
+    },
+    {
+      "id": "bfa2ca340bba56e8fb55af987346482e10020c4fe90c7d7d45ce03b05fbae0bd",
+      "kind": 31923,
+      "d": "22-bitdevs-bh-2026-01-28",
+      "title": "22˚ Bitdevs BH",
+      "startMs": 1769637600000,
+      "endMs": 1769648400000,
+      "location": "UFMG - Escola de Engenharia",
+      "image": "https://secure.meetupstatic.com/photos/event/b/a/9/f/clean_517247775.webp",
+      "description": "kind: 31923",
+      "tags": [
+        "bitcoin",
+        "development",
+        "BH"
+      ],
+      "dateOnly": false
+    },
+    {
+      "id": "2ee9fd8fc94d999faebf69ba38a0dad694d63e48b723227aac7af666b4db40ca",
+      "kind": 31923,
+      "d": "21-bitdevs-bh",
+      "title": "21˚ Bitdevs BH",
+      "startMs": 1769637600000,
+      "endMs": 1769648400000,
+      "location": "Escola de Engenharia",
+      "image": "https://secure.meetupstatic.com/photos/event/b/a/9/f/clean_517247775.webp",
+      "description": "O Primeiro BH Bitdevs do Clube Bitcoin UFMG acontece dia 28 na Escola de Engenharia. Traga sua pergunta e veem aprender com a gente!",
+      "tags": [
+        "bitcoin",
+        "development",
+        "bh"
+      ],
+      "dateOnly": false
+    }
+  ],
+  "fetchedAt": "2026-09-27T03:56:55.792Z"
 }

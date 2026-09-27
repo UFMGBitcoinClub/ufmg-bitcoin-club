@@ -1,4 +1,19 @@
 {
-  "members": [],
-  "fetchedAt": null
+  "members": [
+    {
+      "pubkey": "6a8cc5cf25ff56e3652bca7a4947119f3cc162e693a31b63d9afc6d859691925",
+      "name": "Master",
+      "picture": "https://blossom.primal.net/bc07d24d4584882cb7a1268f81aaaaad60463cf2b8d2ca8c16f79eaea50f10cf.jpg",
+      "about": "Crypto, Distributed Systems & Nostr Enthusiast.",
+      "nip05": null,
+      "githubUrl": "https://github.com/ViniMF13",
+      "linkedinUrl": "https://www.linkedin.com/in/viniciusmf13/",
+      "joinedAt": "2026-09-24T17:54:39.000Z",
+      "attendance": {
+        "rsvp": [],
+        "checkin": []
+      }
+    }
+  ],
+  "fetchedAt": "2026-09-27T03:57:00.734Z"
 }

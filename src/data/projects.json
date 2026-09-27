@@ -1,4 +1,62 @@
 {
-  "projects": [],
-  "fetchedAt": "2026-09-02T04:42:38.510Z"
+  "projects": [
+    {
+      "id": "d0004b2c1c744235559e09147862b23e31aaf8e77fc49effccc0afa50137faa0",
+      "d": "bitvm-protocol",
+      "title": "BitVM Protocol Paper",
+      "status": "ACTIVE",
+      "type": "paper",
+      "description": "A comprehensive paper on the BitVM protocol, covering its design, security properties, and potential applications.",
+      "linkUrl": null,
+      "contributors": [],
+      "tags": [
+        "bitcoin",
+        "bitvm",
+        "protocol",
+        "research"
+      ]
+    },
+    {
+      "id": "6afd5e68065e43b8844596cf633314442b90ce3d839122ca0becd108f0afa763",
+      "d": "nostr-meetup",
+      "title": "Nostr Meetup",
+      "status": "draft",
+      "type": "repo",
+      "description": "A nostr based webapp for create and manage events.",
+      "linkUrl": null,
+      "contributors": [],
+      "tags": [
+        "nostr",
+        "meetup",
+        "webapp"
+      ]
+    },
+    {
+      "id": "0d40fc8bbe0413bfe9b60d128669235734c2dec13356b01326ac3263dd07dd3d",
+      "d": "ufmg-relay",
+      "title": "UFMG Nostr Relay",
+      "status": "DRAFT",
+      "type": "repo",
+      "description": "Draft description for the official UFMG Nostr relay project, emphasizing distributed-networks and community operation.",
+      "linkUrl": "https://github.com/UFMGBitcoinClub/pampulha-relay",
+      "contributors": [],
+      "tags": [
+        "nostr",
+        "ufmg",
+        "distributed-networks"
+      ]
+    },
+    {
+      "id": "8f2a48c22883761aab904e60bce2cccf6fc2fcf8c9358f4ba2572ada55ed5dc5",
+      "d": "bitcoin-club-cli",
+      "title": "nostr identity manager",
+      "status": "ACTIVE",
+      "type": "Repo",
+      "description": "A simple cli tool for manager the clubs nostr identity and post events easily.",
+      "linkUrl": "https://github.com/UFMGBitcoinClub/bitcoin-club-cli",
+      "contributors": [],
+      "tags": []
+    }
+  ],
+  "fetchedAt": "2026-09-27T03:57:03.669Z"
 }

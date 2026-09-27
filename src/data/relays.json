@@ -1,4 +1,146 @@
 {
-  "relays": [],
-  "probedAt": "2026-09-02T04:42:52.926Z"
+  "relays": [
+    {
+      "url": "wss://nostr.wine",
+      "host": "nostr.wine",
+      "ok": true,
+      "latencyMs": 528,
+      "error": null,
+      "nip11": {
+        "name": "nostr.wine",
+        "description": "A paid nostr relay for wine enthusiasts and everyone else.",
+        "software": "https://nostr.wine",
+        "version": "0.3.3",
+        "pubkey": "4918eb332a41b71ba9a74b1dc64276cfff592e55107b93baae38af3520e55975",
+        "contact": "wino@nostr.wine",
+        "supportedNips": [
+          1,
+          2,
+          4,
+          9,
+          11,
+          40,
+          42,
+          50,
+          70
+        ],
+        "limits": {
+          "max_message_length": 524288,
+          "max_subscriptions": 50,
+          "auth_required": false,
+          "payment_required": true
+        }
+      },
+      "eventCounts": {},
+      "totalEvents": 0,
+      "probedAt": "2026-09-27T03:57:04.193Z"
+    },
+    {
+      "url": "wss://relay.primal.net",
+      "host": "relay.primal.net",
+      "ok": true,
+      "latencyMs": 599,
+      "error": null,
+      "nip11": {
+        "name": "Primal Public Relay",
+        "description": "Primal Public Relay",
+        "software": "git+https://github.com/hoytech/strfry.git",
+        "version": "1.0.3-1-g60d35a6",
+        "pubkey": "dd9b989dfe5e0840a92538f3e9f84f674e5f17ab05932efbacb4d8e6c905f302",
+        "contact": "primal.net",
+        "supportedNips": [
+          1,
+          2,
+          4,
+          9,
+          11,
+          22,
+          28,
+          40,
+          70,
+          77
+        ],
+        "limits": {
+          "max_message_length": 1000000,
+          "max_subscriptions": 20
+        }
+      },
+      "eventCounts": {},
+      "totalEvents": 0,
+      "probedAt": "2026-09-27T03:57:04.220Z"
+    },
+    {
+      "url": "wss://relay.damus.io",
+      "host": "relay.damus.io",
+      "ok": false,
+      "latencyMs": null,
+      "error": "connection failed",
+      "nip11": {
+        "name": "damus.io",
+        "description": "Damus strfry relay",
+        "software": "git+https://github.com/hoytech/strfry.git",
+        "version": "1.1.0-158-gb705403ddf49",
+        "pubkey": "32e1827635450ebb3c5a7d12c1f8e7b2b514439ac10a67eef3d9fd9c5c68e245",
+        "contact": "jb55@jb55.com",
+        "supportedNips": [
+          1,
+          2,
+          4,
+          9,
+          11,
+          28,
+          40,
+          45,
+          59,
+          70
+        ],
+        "limits": {
+          "max_message_length": 1000000,
+          "max_subscriptions": 200
+        }
+      },
+      "eventCounts": {},
+      "totalEvents": 0,
+      "probedAt": "2026-09-27T03:57:04.221Z"
+    },
+    {
+      "url": "wss://nos.lol",
+      "host": "nos.lol",
+      "ok": true,
+      "latencyMs": 637,
+      "error": null,
+      "nip11": {
+        "name": "nos.lol",
+        "description": "Generally accepts notes, except spammy ones.",
+        "software": "git+https://github.com/hoytech/strfry.git",
+        "version": "1.1.3",
+        "pubkey": "c5fadeb5d90d68baffc631455a07ca340ccf1e31110955e16d45eb5f87147cd9",
+        "contact": null,
+        "supportedNips": [
+          1,
+          2,
+          4,
+          9,
+          11,
+          28,
+          40,
+          45,
+          70
+        ],
+        "limits": {
+          "max_message_length": 131072,
+          "max_subscriptions": 20
+        }
+      },
+      "eventCounts": {
+        "0": 1,
+        "1": 3,
+        "31923": 11,
+        "32268": 4
+      },
+      "totalEvents": 19,
+      "probedAt": "2026-09-27T03:57:04.223Z"
+    }
+  ],
+  "probedAt": "2026-09-27T03:57:05.172Z"
 }

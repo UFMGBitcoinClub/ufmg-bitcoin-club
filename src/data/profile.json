@@ -1,13 +1,13 @@
 {
-  "pubkey": null,
-  "created_at": null,
-  "name": null,
-  "display_name": null,
-  "about": null,
-  "picture": null,
-  "banner": null,
-  "nip05": null,
-  "lud16": null,
-  "website": null,
-  "fetchedAt": null
+  "pubkey": "c18dfd971665a85ac9c3590036ff62c97845af9abb26a26f25803bbfd01688f2",
+  "created_at": 1788027061,
+  "name": "ufmgBitcoinClub",
+  "display_name": "Clube Bitcoin UFMG",
+  "about": "A student club from UFMG (Federal University of Minas Gerais) for Bitcoin research | Building a student Bitcoin community in BH | Established at 900,792",
+  "picture": "https://blossom.primal.net/25c7e1350fd1793957a88c6c766b5567effe24df2c9ca78f1854be45287f42fa.jpg",
+  "banner": "https://blossom.primal.net/3097111e84c50a98bd9dccb26072495be14f9069927a9b803902d2867f9f4d23.jpg",
+  "nip05": "",
+  "lud16": "clubebitcoinufmg@getalby.com",
+  "website": "https://github.com/UFMGBitcoinClub",
+  "fetchedAt": "2026-09-27T03:56:52.750Z"
 }

@@ -1,4 +1,26 @@
 {
-  "items": [],
-  "fetchedAt": null
+  "items": [
+    {
+      "type": "note",
+      "id": "ef49aa6133ae250dc8d32a1b937918d1652ed1654d9cbfa9fec8a93b66a9fd89",
+      "pubkey": "c18dfd971665a85ac9c3590036ff62c97845af9abb26a26f25803bbfd01688f2",
+      "created_at": 1788305639,
+      "content": "Our new Bitcoin Club website is live!"
+    },
+    {
+      "type": "note",
+      "id": "90c9da40bca77584eae1ad057335ad81dc9b313fbd0188b498e4a285b8cdb8dc",
+      "pubkey": "c18dfd971665a85ac9c3590036ff62c97845af9abb26a26f25803bbfd01688f2",
+      "created_at": 1788146777,
+      "content": "🚀 Introducing the Clube Bitcoin UFMG Nostr Identity Manager!\n\nWe're excited to announce our new open-source tool for managing the club's Nostr identity. This agentic AI assistant helps us draft, review, and publish content directly to Nostr — from event announcements and project updates to profile changes and calendar events.\n\nBuilt with ⚡ for the Bitcoin community, by the Bitcoin community. The tool ensures our Nostr presence stays sovereign, transparent, and collaborative.\n\nCheck out the repo, contribute, or just follow along as we dogfood it in real time!\n\n#bitcoinclub #opensource #nostr #agenticai"
+    },
+    {
+      "type": "note",
+      "id": "0b39ce44a509636a46f0794c4d2e3498322b92bdea0c48f099042aa87e502a4c",
+      "pubkey": "c18dfd971665a85ac9c3590036ff62c97845af9abb26a26f25803bbfd01688f2",
+      "created_at": 1787417309,
+      "content": "O Primeiro BH BitDevs do Semestre tá chegando! 🟠\n\nDia 26/08 na Escola de Engenharia da UFMG\n\nAlguns tópicos:\n-  ColdCard postmortem e o bug de entropia\n-  Incidentes em ZEUS, BTCPay e Boltz\n- BIP 110, chain split e alteração de PoW\n\nPauta: https://bhbitdevs.org/2026-08-26-socratic-seminar-28\n\nInscrição: https://meetup.com/belo-horizonte-bitdevs/events/315985829/"
+    }
+  ],
+  "fetchedAt": "2026-09-27T03:56:54.306Z"
 }
