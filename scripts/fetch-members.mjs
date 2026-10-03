@@ -134,7 +134,21 @@ async function main() {
     checkinsByPubkey.set(evt.pubkey, set);
   }
 
+  const existing = await (async () => {
+    try {
+      return JSON.parse(await readFile(OUTPUT_PATH, "utf-8"));
+    } catch {
+      return null;
+    }
+  })();
+  const existingByPubkey = new Map();
+  for (const prev of existing?.members ?? []) {
+    if (prev?.pubkey) existingByPubkey.set(prev.pubkey.toLowerCase(), prev);
+  }
+
   const members = configured.map((m) => {
+    const pk = m.pubkey.toLowerCase();
+    const prev = existingByPubkey.get(pk);
     const evt = latestByPubkey.get(m.pubkey);
     let content = {};
     if (evt) {
@@ -143,24 +157,34 @@ async function main() {
       } catch (err) {
         console.warn(`[fetch-members] Failed to parse profile for ${m.pubkey}: ${err.message}`);
       }
-    } else {
+    } else if (!prev) {
       console.warn(`[fetch-members] No kind:0 event found for ${m.pubkey} on any relay.`);
     }
 
     const joinedAtMs = joinedAtFromGit(m.pubkey);
+    const gitJoinedAt = joinedAtMs ? new Date(joinedAtMs * 1000).toISOString() : null;
+
+    // Union attendance with previously recorded attendance
+    const prevRsvps = prev?.attendance?.rsvp ?? [];
+    const freshRsvps = rsvpsByPubkey.get(m.pubkey) ?? [];
+    const mergedRsvps = [...new Set([...prevRsvps, ...freshRsvps])].sort();
+
+    const prevCheckins = prev?.attendance?.checkin ?? [];
+    const freshCheckins = checkinsByPubkey.get(m.pubkey) ?? [];
+    const mergedCheckins = [...new Set([...prevCheckins, ...freshCheckins])].sort();
 
     return {
       pubkey: m.pubkey,
-      name: content.display_name || content.name || null,
-      picture: content.picture || null,
-      about: m.roleOverride || content.about || null,
-      nip05: content.nip05 || null,
-      githubUrl: m.githubUrl || null,
-      linkedinUrl: m.linkedinUrl || null,
-      joinedAt: joinedAtMs ? new Date(joinedAtMs * 1000).toISOString() : null,
+      name: content.display_name || content.name || prev?.name || null,
+      picture: content.picture || prev?.picture || null,
+      about: m.roleOverride || content.about || prev?.about || null,
+      nip05: content.nip05 !== undefined ? content.nip05 : (prev?.nip05 ?? null),
+      githubUrl: m.githubUrl || prev?.githubUrl || null,
+      linkedinUrl: m.linkedinUrl || prev?.linkedinUrl || null,
+      joinedAt: gitJoinedAt || prev?.joinedAt || null,
       attendance: {
-        rsvp: [...(rsvpsByPubkey.get(m.pubkey) ?? [])].sort(),
-        checkin: [...(checkinsByPubkey.get(m.pubkey) ?? [])].sort(),
+        rsvp: mergedRsvps,
+        checkin: mergedCheckins,
       },
     };
   });

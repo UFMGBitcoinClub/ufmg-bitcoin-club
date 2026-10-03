@@ -101,31 +101,49 @@ async function main() {
     }
   }
 
-  const hasContent = definitions.length > 0 || awards.length > 0;
-  if (!hasContent) {
-    const existing = await readExisting();
-    if (
-      existing &&
-      ((existing.definitions ?? []).length > 0 || (existing.awards ?? []).length > 0)
-    ) {
-      console.warn(
-        "[fetch-badges] No badge events returned by any relay — keeping previously committed badges.json (assuming outage, not empty state)."
-      );
-      return;
+  const existing = await readExisting();
+
+  // Merge definitions (union by id/d)
+  const defsMap = new Map();
+  for (const prev of existing?.definitions ?? []) {
+    if (prev?.id) defsMap.set(prev.id, prev);
+  }
+  for (const def of definitions) {
+    if (def?.id) defsMap.set(def.id, def);
+  }
+  const mergedDefinitions = [...defsMap.values()];
+
+  // Merge awards (union by composite key badgeId:pubkey)
+  const awardsMap = new Map();
+  for (const prev of existing?.awards ?? []) {
+    if (prev?.badgeId && prev?.pubkey) {
+      const key = `${prev.badgeId}:${prev.pubkey}`;
+      awardsMap.set(key, prev);
     }
+  }
+  for (const award of awards) {
+    const key = `${award.badgeId}:${award.pubkey}`;
+    awardsMap.set(key, award);
+  }
+  const mergedAwards = [...awardsMap.values()].sort(
+    (a, b) => (b.awardedAt || 0) - (a.awardedAt || 0)
+  );
+
+  const hasContent = mergedDefinitions.length > 0 || mergedAwards.length > 0;
+  if (!hasContent) {
     console.warn("[fetch-badges] No badges published yet. Writing honest empty state.");
   }
 
   const payload = {
-    definitions,
-    awards,
+    definitions: mergedDefinitions,
+    awards: mergedAwards,
     fetchedAt: new Date().toISOString(),
   };
 
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, JSON.stringify(payload, null, 2) + "\n", "utf-8");
   console.log(
-    `[fetch-badges] Wrote badges.json (${definitions.length} definition(s), ${awards.length} award(s))`
+    `[fetch-badges] Wrote badges.json (${mergedDefinitions.length} definition(s), ${mergedAwards.length} award(s))`
   );
 }
 

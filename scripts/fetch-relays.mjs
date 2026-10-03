@@ -161,8 +161,23 @@ async function main() {
   const probedAt = new Date().toISOString();
   const okCount = relays.filter((r) => r.ok).length;
 
+  const existing = await readExisting();
+  const existingRelaysMap = new Map((existing?.relays ?? []).map((r) => [r.url, r]));
+
+  // If a relay probe timed out on event subscriptions or NIP-11 fetching,
+  // preserve known previous event counts and NIP-11 info.
+  for (const r of relays) {
+    const prev = existingRelaysMap.get(r.url);
+    if (prev) {
+      if (!r.nip11 && prev.nip11) r.nip11 = prev.nip11;
+      if (r.totalEvents === 0 && prev.totalEvents > 0) {
+        r.eventCounts = { ...prev.eventCounts };
+        r.totalEvents = prev.totalEvents;
+      }
+    }
+  }
+
   if (okCount === 0) {
-    const existing = await readExisting();
     if (existing && Array.isArray(existing.relays) && existing.relays.some((r) => r.ok)) {
       console.warn(
         "[fetch-relays] Every probe failed but a healthy relays.json already exists — keeping it (likely a build-runner outage)."

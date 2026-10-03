@@ -117,26 +117,35 @@ async function main() {
     for (const addr of matchedAddresses) bump(addr, status);
   }
 
-  const payload = {
-    byEvent: Object.fromEntries(byEvent),
-    fetchedAt: new Date().toISOString(),
-  };
+  const existing = await readExisting();
+  const mergedByEvent = { ...(existing?.byEvent ?? {}) };
 
-  const hasContent = byEvent.size > 0;
-  if (!hasContent) {
-    const existing = await readExisting();
-    if (existing && Object.keys(existing.byEvent ?? {}).length > 0) {
-      console.warn(
-        "[fetch-rsvps] No RSVP events returned by any relay — keeping previously committed rsvps.json (assuming outage, not empty state)."
-      );
-      return;
+  for (const [key, counts] of byEvent.entries()) {
+    const prev = mergedByEvent[key];
+    if (!prev) {
+      mergedByEvent[key] = counts;
+    } else {
+      mergedByEvent[key] = {
+        going: Math.max(prev.going ?? 0, counts.going ?? 0),
+        tentative: Math.max(prev.tentative ?? 0, counts.tentative ?? 0),
+        declined: Math.max(prev.declined ?? 0, counts.declined ?? 0),
+      };
     }
+  }
+
+  const hasContent = Object.keys(mergedByEvent).length > 0;
+  if (!hasContent) {
     console.warn("[fetch-rsvps] No RSVPs published yet. Writing honest empty state.");
   }
 
+  const payload = {
+    byEvent: mergedByEvent,
+    fetchedAt: new Date().toISOString(),
+  };
+
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, JSON.stringify(payload, null, 2) + "\n", "utf-8");
-  console.log(`[fetch-rsvps] Wrote rsvps.json (${byEvent.size} event(s) with RSVPs)`);
+  console.log(`[fetch-rsvps] Wrote rsvps.json (${Object.keys(mergedByEvent).length} event(s) with RSVPs)`);
 }
 
 main().catch((err) => {

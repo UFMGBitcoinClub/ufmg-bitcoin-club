@@ -71,29 +71,39 @@ async function main() {
 
   const existing = await readExisting();
 
-  if (events.length === 0 && existing && existing.projects.length > 0) {
+  // Merge with previously committed projects: union by `d` (newest fresh
+  // event wins; committed entries carried over when the fresh fetch did
+  // not return that `d` or when relays are unreachable).
+  const byD = new Map();
+
+  // 1. Seed with existing normalized projects
+  for (const prev of existing?.projects ?? []) {
+    if (prev?.d) byD.set(prev.d, prev);
+  }
+
+  // 2. Deduplicate fresh raw Nostr events by `d` (keeping newest)
+  const freshByD = new Map();
+  for (const evt of events) {
+    const d = tagValue(evt.tags, "d");
+    if (!d) continue;
+    const existingEvt = freshByD.get(d);
+    if (!existingEvt || evt.created_at > existingEvt.created_at) freshByD.set(d, evt);
+  }
+
+  // 3. Normalize fresh events and overlay them onto byD
+  for (const rawEvt of freshByD.values()) {
+    const normalized = normalizeEvent(rawEvt);
+    if (normalized?.d) byD.set(normalized.d, normalized);
+  }
+
+  const projects = [...byD.values()];
+
+  if (projects.length === 0 && existing && existing.projects.length > 0) {
     console.warn(
       "[fetch-projects] No events returned by any relay — keeping previously committed projects.json (assuming outage, not a genuine empty state)."
     );
     return;
   }
-
-  // Merge with previously committed metadata: union by `d` (newest fresh
-  // event wins; committed entries only carried over when the fresh fetch did
-  // not return that `d` at all). This makes partial relay failures
-  // non-destructive instead of all-or-nothing.
-  const byD = new Map();
-  for (const evt of events) {
-    const d = tagValue(evt.tags, "d");
-    if (!d) continue;
-    const existingEvt = byD.get(d);
-    if (!existingEvt || evt.created_at > existingEvt.created_at) byD.set(d, evt);
-  }
-  for (const prev of existing?.projects ?? []) {
-    if (prev?.d && !byD.has(prev.d)) byD.set(prev.d, prev);
-  }
-
-  const projects = [...byD.values()].map(normalizeEvent).filter(Boolean);
 
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(

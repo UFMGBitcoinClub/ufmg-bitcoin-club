@@ -9,7 +9,7 @@
 // Malformed events (missing title/start) are dropped rather than crashing
 // the build, per the Phase 3 Definition of Done.
 
-import { writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { RELAYS } from "./lib/relays.mjs";
@@ -34,7 +34,8 @@ function normalizeEvent(evt) {
   const startRaw = tagValue(evt.tags, "start");
   const endRaw = tagValue(evt.tags, "end");
   const location = tagValue(evt.tags, "location");
-  const image = tagValue(evt.tags, "image");  const topics = tagValues(evt.tags, "t");
+  const image = tagValue(evt.tags, "image");
+  const topics = tagValues(evt.tags, "t");
 
   if (!d || !title || !startRaw) return null;
 
@@ -62,10 +63,31 @@ function normalizeEvent(evt) {
   };
 }
 
+async function readExisting() {
+  try {
+    return JSON.parse(await readFile(OUTPUT_PATH, "utf-8"));
+  } catch {
+    return null;
+  }
+}
+
 async function main() {
   if (!CLUB_PUBKEY || CLUB_PUBKEY.startsWith("REPLACE_WITH")) {
     console.warn("[fetch-calendar] CLUB_PUBKEY is not set — skipping fetch.");
     return;
+  }
+
+  const existing = await readExisting();
+  const existingEvents = [
+    ...(existing?.upcoming ?? []),
+    ...(existing?.past ?? []),
+  ];
+
+  // Map existing normalized events by unique key (d tag, falling back to id)
+  const byKey = new Map();
+  for (const ev of existingEvents) {
+    const key = ev.d || ev.id;
+    if (key) byKey.set(key, ev);
   }
 
   console.log(`[fetch-calendar] Querying kinds 31922/31923 for ${CLUB_PUBKEY}...`);
@@ -79,33 +101,47 @@ async function main() {
 
   if (events.length === 0) {
     console.warn(
-      "[fetch-calendar] No calendar events found. Keeping previously committed calendar.json."
+      "[fetch-calendar] No calendar events returned by relays. Keeping existing events and refreshing upcoming/past partition."
     );
+  } else {
+    // Parameterized replaceable events: keep newest raw event per d tag
+    const freshByD = new Map();
+    for (const evt of events) {
+      const d = tagValue(evt.tags, "d");
+      if (!d) continue;
+      const prev = freshByD.get(d);
+      if (!prev || evt.created_at > prev.created_at) freshByD.set(d, evt);
+    }
+
+    const freshNormalized = [...freshByD.values()].map(normalizeEvent).filter(Boolean);
+
+    // Overlay fresh events onto existing events (additive merge)
+    for (const ev of freshNormalized) {
+      const key = ev.d || ev.id;
+      if (key) byKey.set(key, ev);
+    }
+  }
+
+  const allMerged = [...byKey.values()];
+  if (allMerged.length === 0) {
+    console.warn("[fetch-calendar] No calendar events found or previously recorded.");
     return;
   }
 
-  const byD = new Map();
-  for (const evt of events) {
-    const d = tagValue(evt.tags, "d");
-    if (!d) continue;
-    const existing = byD.get(d);
-    if (!existing || evt.created_at > existing.created_at) byD.set(d, evt);
-  }
-
-  const normalized = [...byD.values()].map(normalizeEvent).filter(Boolean);
-
   const now = Date.now();
-  const upcoming = normalized
+  const upcoming = allMerged
     .filter((e) => e.startMs >= now)
     .sort((a, b) => a.startMs - b.startMs);
-  const past = normalized.filter((e) => e.startMs < now).sort((a, b) => b.startMs - a.startMs);
+  const past = allMerged
+    .filter((e) => e.startMs < now)
+    .sort((a, b) => b.startMs - a.startMs);
 
   const calendar = { upcoming, past, fetchedAt: new Date().toISOString() };
 
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, JSON.stringify(calendar, null, 2) + "\n", "utf-8");
   console.log(
-    `[fetch-calendar] Wrote calendar.json (${upcoming.length} upcoming, ${past.length} past)`
+    `[fetch-calendar] Wrote calendar.json (${upcoming.length} upcoming, ${past.length} past, total: ${allMerged.length})`
   );
 }
 

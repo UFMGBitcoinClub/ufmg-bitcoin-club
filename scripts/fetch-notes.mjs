@@ -97,25 +97,33 @@ async function main() {
     })
     .filter(Boolean);
 
-  const seen = new Set();
-  const items = [...normalizedNotes, ...normalizedReposts]
-    .sort((a, b) => b.created_at - a.created_at)
-    .filter((item) => {
-      if (seen.has(item.id)) return false;
-      seen.add(item.id);
-      return true;
-    });
+  const existing = await readExistingFeed();
+  const byId = new Map();
 
-  if (items.length === 0) {
-    const existing = await readExistingFeed();
+  // Seed with existing feed items
+  for (const prev of existing?.items ?? []) {
+    if (prev?.id) byId.set(prev.id, prev);
+  }
+
+  // Overlay fresh normalized notes and reposts
+  const freshItems = [...normalizedNotes, ...normalizedReposts];
+  for (const item of freshItems) {
+    if (item?.id) byId.set(item.id, item);
+  }
+
+  if (byId.size === 0) {
     if (existing && existing.items && existing.items.length > 0) {
       console.warn(
-        "[fetch-notes] No items returned from any relay but a non-empty feed.json already exists — keeping it (likely a relay outage, not an empty account)."
+        "[fetch-notes] No items returned from any relay but a non-empty feed.json already exists — keeping it."
       );
       return;
     }
     console.warn("[fetch-notes] No notes or reposts found. Writing empty feed (first run or genuinely empty account).");
   }
+
+  const items = [...byId.values()]
+    .sort((a, b) => b.created_at - a.created_at)
+    .slice(0, 100);
 
   const feed = { items, fetchedAt: new Date().toISOString() };
 
